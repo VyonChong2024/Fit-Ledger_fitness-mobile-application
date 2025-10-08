@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">FYP_FitLedger</string>
     <string name="display_app_name">Fit Ledger</string>
-    <string name="api_key"></string>
+    <string name="api_key">[your_api_key]</string>
 </resources>
