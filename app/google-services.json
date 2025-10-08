@@ -1,8 +1,8 @@
 {
   "project_info": {
-    "project_number": "7071504609",
+    "project_number": "your_project_id",
     "project_id": "fitledger-focs2025",
-    "storage_bucket": "fitledger-focs2025.firebasestorage.app"
+    "storage_bucket": "your_firebase_storage_url"
   },
   "client": [
     {
