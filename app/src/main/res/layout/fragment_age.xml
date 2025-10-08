@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="20dp"
+    android:background="@color/light_grayish_blue">
+
+    <TextView
+        android:text="Select Your Age"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="@color/teal_700"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:shadowRadius="4"
+        android:shadowColor="@color/gray"/>
+
+    <!-- Age Group Icon -->
+    <ImageView
+        android:id="@+id/ageIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/icon_age_m4" />
+
+    <!-- SeekBar for Age Selection -->
+    <SeekBar
+        android:id="@+id/seekBarAge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:min="1"
+        android:max="100"
+        android:progress="18"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Display Selected Age -->
+    <TextView
+        android:id="@+id/tvAge"
+        android:text="Age: 18"
+        android:textSize="22sp"
+        android:textColor="@color/teal_700"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- Next Button (Disabled for ages 1-10) -->
+    <Button
+        android:id="@+id/btnNext"
+        android:text="Next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:enabled="true"/>
+</LinearLayout>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="@color/light_grayish_blue">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Your Activity Level"
+        android:textSize="22sp"
+        android:textAlignment="center"
+        android:textColor="@color/teal_700"
+        android:textStyle="bold"
+        android:shadowRadius="2"
+        android:shadowColor="@color/gray"/>
+
+    <ImageView
+        android:id="@+id/alIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/icon_al_3" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_activity_level"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:valueFrom="1"
+        android:valueTo="5"
+        android:stepSize="1"
+        android:value="3"
+        app:labelBehavior="gone"/>
+
+    <TextView
+        android:id="@+id/tv_activity_level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Moderately Active"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/teal_200"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Your Activity Frequency"
+        android:textSize="22sp"
+        android:textAlignment="center"
+        android:textColor="@color/teal_700"
+        android:textStyle="bold"
+        android:shadowRadius="2"
+        android:shadowColor="@color/gray"/>
+
+    <ImageView
+        android:id="@+id/afIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/icon_af_3" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_activity_frequency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:valueFrom="1"
+        android:valueTo="5"
+        android:stepSize="1"
+        android:value="3"
+        app:labelBehavior="gone"/>
+
+    <TextView
+        android:id="@+id/tv_activity_frequency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Regularly"
+        android:textSize="16sp"
+        android:textColor="@color/teal_200"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next"
+        android:layout_marginTop="24dp"
+        android:enabled="false"/>
+</LinearLayout>

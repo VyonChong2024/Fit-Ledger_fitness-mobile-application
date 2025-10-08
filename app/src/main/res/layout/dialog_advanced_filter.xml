@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Muscle Group"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvMuscleFilter1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Arm"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvMuscleFilter2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shoulder"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvMuscleFilter3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chest"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvMuscleFilter4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Traps"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvMuscleFilter5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Core"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvMuscleFilter6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Legs"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvMuscleFilter7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Glutes"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Equipment"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvEquipFilter1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Machine"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvEquipFilter2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Smith Machine"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvEquipFilter3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cable Machine"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvEquipFilter4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Barbell"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvEquipFilter5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dumbbell"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvEquipFilter6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kettlebell"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:id="@+id/tvEquipFilter7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Resistance band"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+        <TextView
+            android:id="@+id/tvEquipFilter8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bodyweight"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Others"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tvCardioFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cardio"
+            android:textSize="14sp"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:background="@drawable/round_corner_background"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:text="Cancel"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".2"/>
+        <Button
+            android:id="@+id/applyButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:text="Apply"/>
+    </LinearLayout>
+
+</LinearLayout>

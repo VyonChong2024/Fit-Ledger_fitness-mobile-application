@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app2="http://schemas.android.com/apk/res-auto">
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/des_cyan" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/tvWorkoutName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Workout Name"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center_vertical|start"/>
+
+            <TextView
+                android:id="@+id/tvTimer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="timer"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnFinish"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Finish"
+            android:enabled="false"
+            android:background="@drawable/round_corner_background"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light_grey" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="620dp"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="10dp"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp">
+
+            <LinearLayout
+                android:id="@+id/exerciseLogContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp">
+
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/tvAddExercise"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add Exercise"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:textColor="@color/emerald_green"/>
+
+            <TextView
+                android:id="@+id/tvCancelWorkout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cancel workout"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:textColor="@android:color/holo_red_dark"/>
+
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

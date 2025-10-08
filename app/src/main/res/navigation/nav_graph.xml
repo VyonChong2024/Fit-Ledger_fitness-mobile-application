@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph.xml">
+
+    <fragment
+        android:id="@+id/heightWeightFragment"
+        android:name="com.example.fyp_fitledger.HeightWeightFragment"
+        app:layout="@layout/fragment_height_weight">
+        <action
+            android:id="@+id/action_to_bodyMetricsFragment"
+            app:destination="@id/bodyMetricsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bodyMetricsFragment"
+        android:name="com.example.fyp_fitledger.BodyMetricsFragment"
+        app:layout="@layout/fragment_body_metrics">
+        <action
+            android:id="@+id/action_to_accurateMeasurementFragment"
+            app:destination="@id/accurateMeasurementFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/accurateMeasurementFragment"
+        android:name="com.example.fyp_fitledger.AccurateMeasurementFragment"
+        app:layout="@layout/fragment_accurate_measurement">
+        <action
+            android:id="@+id/action_accurateMeasurementFragment_to_methodSelectionFragment"
+            app:destination="@id/methodSelectionFragment" />
+        <action
+            android:id="@+id/to_workoutPlanAdapter"
+            app:destination="@id/customizeWorkoutFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/methodSelectionFragment"
+        android:name="com.example.fyp_fitledger.MethodSelectionFragment"
+        app:layout="@layout/fragment_method_selection">
+        <action
+            android:id="@+id/action_methodSelectionFragment_to_tapeMeasureFragment"
+            app:destination="@id/tapeMeasureFragment" />
+        <action
+            android:id="@+id/action_methodSelectionFragment_to_fatCaliperFragment"
+            app:destination="@id/fatCaliperFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tapeMeasureFragment"
+        android:name="com.example.fyp_fitledger.TapeMeasureFragment"
+        app:layout="@layout/fragment_tape_measure">
+        <action
+            android:id="@+id/action_tapeMeasureFragment_to_tapeMeasureInputFragment"
+            app:destination="@id/tapeMeasureInputFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fatCaliperFragment"
+        android:name="com.example.fyp_fitledger.FatCaliperFragment"
+        app:layout="@layout/fragment_fat_caliper">
+        <action
+            android:id="@+id/action_fatCaliperFragment_to_measurementInputFragment"
+            app:destination="@id/fatCaliperInputFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tapeMeasureInputFragment"
+        android:name="com.example.fyp_fitledger.TapeMeasureInputFragment"
+        app:layout="@layout/fragment_tape_measure_input">
+        <action
+            android:id="@+id/action_tapeMeasureInputFragment_to_bodyFatResultFragment"
+            app:destination="@id/bodyFatResultFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fatCaliperInputFragment"
+        android:name="com.example.fyp_fitledger.FatCaliperInputFragment"
+        app:layout="@layout/fragment_fat_caliper_input">
+        <action
+            android:id="@+id/action_fatCaliperInputFragment_to_bodyFatResultFragment"
+            app:destination="@id/bodyFatResultFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bodyFatResultFragment"
+        android:name="com.example.fyp_fitledger.BodyFatResultFragment"
+        app:layout="@layout/fragment_body_fat_result">
+        <action
+            android:id="@+id/to_workoutPlanAdapter"
+            app:destination="@id/customizeWorkoutFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/customizeWorkoutFragment"
+        android:name="com.example.fyp_fitledger.CustomizeWorkoutFragment"
+        android:label="Customize Workout">
+
+        <action
+            android:id="@+id/action_customizeWorkoutFragment_to_fitnessGoalFragment"
+            app:destination="@id/fitnessGoalFragment" />
+
+        <action
+            android:id="@+id/action_customizeWorkoutFragment_to_dietAdapterFragment"
+            app:destination="@id/customizeWorkoutFragment" /> <!--dietAdapter-->
+    </fragment>
+
+    <fragment
+        android:id="@+id/fitnessGoalFragment"
+        android:name="com.example.fyp_fitledger.FitnessGoalFragment"
+        android:label="Fitness Goals">
+        <action
+            android:id="@+id/action_fitnessGoalFragment_to_targetWeightFragment"
+            app:destination="@id/targetWeightFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/targetWeightFragment"
+        android:name="com.example.fyp_fitledger.TargetWeightFragment"
+        android:label="Fitness Goals">
+        <action
+            android:id="@+id/action_targetWeightFragment_to_targetBodyFatFragment"
+            app:destination="@id/targetBodyFatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/targetBodyFatFragment"
+        android:name="com.example.fyp_fitledger.TargetBodyFatFragment"
+        android:label="Fitness Goals">
+        <action
+            android:id="@+id/action_targetBodyFatFragment_to_activityLevelFragment"
+            app:destination="@id/activityLevelFrequencyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/activityLevelFrequencyFragment"
+        android:name="com.example.fyp_fitledger.ActivityLevelFrequencyFragment"
+        android:label="Fitness Goals">
+        <action
+            android:id="@+id/action_activityLevelFragment_to_targetMuscleFragment"
+            app:destination="@id/targetMuscleFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/targetMuscleFragment"
+        android:name="com.example.fyp_fitledger.TargetMuscleFragment"
+        android:label="Fitness Goals">
+        <action
+            android:id="@+id/action_targetMuscleFragment_to_workoutPlaceFragment"
+            app:destination="@id/targetMuscleFragment" />
+    </fragment>
+
+</navigation>

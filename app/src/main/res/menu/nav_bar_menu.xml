@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/icon_home"
+        android:tint="@color/teal_700"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/nav_workout"
+        android:icon="@drawable/icon_dumbbell"
+        android:tint="@color/icon_color_1"
+        android:title="Workout" />
+
+    <item
+        android:id="@+id/nav_diet"
+        android:icon="@drawable/icon_meal"
+        android:tint="@color/icon_color_1"
+        android:title="Diet" />
+
+    <item
+        android:id="@+id/nav_more"
+        android:icon="@drawable/icon_more"
+        android:tint="@color/icon_color_1"
+        android:title="More" />
+
+</menu>

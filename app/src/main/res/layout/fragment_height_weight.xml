@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="20dp"
+    android:background="@color/light_grayish_blue">
+
+    <TextView
+        android:text="Select Your Height"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="@color/teal_700"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:shadowRadius="2"
+        android:shadowColor="@color/gray"/>
+
+    <!-- Height Adjustment -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnMinusHeight"
+            android:text="-"
+            android:textSize="20sp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            app:cardCornerRadius="10dp"
+            android:layout_margin="10dp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvHeight"
+                android:text="170.0 cm"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:textColor="@color/teal_700"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/btnPlusHeight"
+            android:text="+"
+            android:textSize="20sp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+    </LinearLayout>
+
+    <!-- Height Unit Toggle -->
+    <RadioGroup
+        android:id="@+id/radioGroupHeight"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton android:id="@+id/radioCm" android:text="cm" android:checked="true" android:layout_height="50dp" android:layout_width="80dp"/>
+        <RadioButton android:id="@+id/radioFeet" android:text="feet" android:layout_height="50dp" android:layout_width="80dp"/>
+    </RadioGroup>
+
+    <TextView
+        android:text="Select Your Weight"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="@color/teal_700"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:shadowRadius="2"
+        android:shadowColor="@color/gray"/>
+
+    <!-- Weight Adjustment -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnMinusWeight"
+            android:text="-"
+            android:textSize="20sp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            app:cardCornerRadius="10dp"
+            android:layout_margin="10dp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvWeight"
+                android:text="65.0 kg"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:textColor="@color/teal_700"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/btnPlusWeight"
+            android:text="+"
+            android:textSize="20sp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+    </LinearLayout>
+
+    <!-- Weight Unit Toggle -->
+    <RadioGroup
+        android:id="@+id/radioGroupWeight"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton android:id="@+id/radioKg" android:text="kg" android:checked="true" android:layout_height="50dp" android:layout_width="80dp"/>
+        <RadioButton android:id="@+id/radioLbs" android:text="lbs" android:layout_height="50dp" android:layout_width="80dp"/>
+    </RadioGroup>
+
+    <!-- Next Button -->
+    <Button
+        android:id="@+id/btnNext"
+        android:text="Next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"/>
+</LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircularPercentageRingView">
+        <attr name="percentage" format="float" />
+        <attr name="ringColor" format="color" />
+        <attr name="ringBackgroundColor" format="color" />
+        <attr name="ringWidth" format="dimension" />
+        <attr name="startAngle" format="float" />
+    </declare-styleable>
+</resources>

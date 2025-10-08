@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+
+    <color name="des_cyan">#80cbc4</color>      //header
+    <color name="light_grey">#d9d9d9</color>    //profile circle
+    <color name="light_grayish_blue">#f0f4f8</color>    //card view
+    <color name="grayish_blue">#b0bec5</color>  //card text
+    <color name="gray">#676767</color>  //dashboard text
+    <color name="grayish_lime_green">#a5d6a7</color>    //card view header, nav bar color
+
+    <color name="light_grayish_cyan">#e0f7fa</color>
+    <color name="middle_washed_orange">#ff7043</color>
+
+    //Pie chart color
+    <color name="sky_blue">#6ce5e8</color>
+    <color name="emerald_green">#41d8b5</color>
+    <color name="cyan_cornflower_blue">#2d8bba</color>
+    <color name="bdazzled_blue">#2f5f98</color>
+    <color name="deep_koamaru">#31356e</color>
+
+    //Icon color
+    <color name="white">#FFFFFFFF</color>
+    <color name="japanese_laurel">#2e7d32</color>
+
+</resources>

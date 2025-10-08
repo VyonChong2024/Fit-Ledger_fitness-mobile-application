@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "7071504609",
+    "project_id": "fitledger-focs2025",
+    "storage_bucket": "fitledger-focs2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:7071504609:android:98f915e8b6e60af3943fa0",
+        "android_client_info": {
+          "package_name": "com.example.fyp_fitledger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "7071504609-ghsd1u0vkur0aicnfk3khi1rtcu3jkrq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fyp_fitledger",
+            "certificate_hash": "fafd031dfbcd6b72ea2ca3afcff264117c645844"
+          }
+        },
+        {
+          "client_id": "7071504609-lv6rufoglppr6h7o68kiebantabeviiu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp7c7fg56AkDbLHZLLpbC6klLzOZTaPbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "7071504609-lv6rufoglppr6h7o68kiebantabeviiu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

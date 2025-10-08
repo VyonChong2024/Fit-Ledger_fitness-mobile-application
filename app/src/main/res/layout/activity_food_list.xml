@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app2="http://schemas.android.com/apk/res-auto">
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/des_cyan" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp">
+
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="320dp"
+            android:layout_height="40dp"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:drawableTint="@color/gray"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="2dp"
+            android:drawableLeft="@drawable/icon_search_resize"
+            android:background="@drawable/search_box_background"/>
+
+    </LinearLayout>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/foodContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp">
+
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

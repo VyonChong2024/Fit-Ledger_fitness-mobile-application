@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FYP_FitLedger" parent="Theme.MaterialComponents.Light.NoActionBar" />
+    <color name="header">#80cbc4</color>      //Pearl Aqua
+    <color name="profile_circle">#d9d9d9</color>    //Light Silver
+    <color name="card_view">#f0f4f8</color>    //Anti-Flash White
+    <color name="card_text">#b0bec5</color>  //Pastel Blue
+    <color name="dashboard_text">#676767</color>  //Granite Gray
+    <color name="nav_bar">#a5d6a7</color>    //Light Moss Green
+
+    //Pie chart color
+    <color name="pie_chart_color_1">#6ce5e8</color>
+    <color name="pie_chart_color_2">#41d8b5</color>
+    <color name="pie_chart_color_3">#2d8bba</color>
+    <color name="pie_chart_color_4">#2f5f98</color>
+    <color name="pie_chart_color_5">#31356e</color>
+
+    //Icon color
+    <color name="icon_color_1">#ffffff</color>
+    <color name="icon_color_2">#2e7d32</color>
+</resources>
