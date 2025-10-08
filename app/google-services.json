@@ -7,35 +7,35 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:7071504609:android:98f915e8b6e60af3943fa0",
+        "mobilesdk_app_id": "your_mobile_app_id",
         "android_client_info": {
           "package_name": "com.example.fyp_fitledger"
         }
       },
       "oauth_client": [
         {
-          "client_id": "7071504609-ghsd1u0vkur0aicnfk3khi1rtcu3jkrq.apps.googleusercontent.com",
+          "client_id": "your_web_client_id",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.fyp_fitledger",
-            "certificate_hash": "fafd031dfbcd6b72ea2ca3afcff264117c645844"
+            "certificate_hash": "your_cert_hash"
           }
         },
         {
-          "client_id": "7071504609-lv6rufoglppr6h7o68kiebantabeviiu.apps.googleusercontent.com",
+          "client_id": "your_web_client_id",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCp7c7fg56AkDbLHZLLpbC6klLzOZTaPbI"
+          "current_key": "your_google_api_key"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "7071504609-lv6rufoglppr6h7o68kiebantabeviiu.apps.googleusercontent.com",
+              "client_id": "your_web_client_id",
               "client_type": 3
             }
           ]
