@@ -32,6 +32,7 @@ class AgeFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_age, container, false)
         userViewModel = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
+        userViewModel.loadFromPreferences(requireContext())
 
         ageIcon = view.findViewById(R.id.ageIcon)
         seekBarAge = view.findViewById(R.id.seekBarAge)
@@ -39,9 +40,9 @@ class AgeFragment : Fragment() {
         btnNext = view.findViewById(R.id.btnNext)
 
         // Get gender from previous fragment
-        arguments?.getString("gender")?.let {
-            selectedGender = it
-        }
+        selectedGender = userViewModel.gender ?: "Male"
+        if (selectedGender == "Female")
+            ageIcon.setImageResource(R.drawable.icon_age_f4)
 
         // Update UI based on seek bar movement
         seekBarAge.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -68,12 +69,14 @@ class AgeFragment : Fragment() {
 
     private fun updateAgeIcon() {
         val iconName = when {
-            selectedAge in 1..3 -> "icon_age_1"
-            selectedAge in 4..10 -> "icon_age_2"
-            selectedAge in 11..17 -> if (selectedGender == "Female") "icon_age_f3" else "icon_age_m3"
-            selectedAge in 18..34 -> if (selectedGender == "Female") "icon_age_f4" else "icon_age_m4"
-            selectedAge in 35..59 -> if (selectedGender == "Female") "icon_age_f5" else "icon_age_m5"
-            else -> if (selectedGender == "Female") "icon_age_f6" else "icon_age_m6"
+            selectedAge in 1..3 -> if (selectedGender == "Female") "icon_age_f1" else "icon_age_m1"
+            selectedAge in 4..6 -> if (selectedGender == "Female") "icon_age_f2" else "icon_age_m2"
+            selectedAge in 7..12 -> if (selectedGender == "Female") "icon_age_f3" else "icon_age_m3"
+            selectedAge in 13..18 -> if (selectedGender == "Female") "icon_age_f4" else "icon_age_m4"
+            selectedAge in 19..30 -> if (selectedGender == "Female") "icon_age_f5" else "icon_age_m5"
+            selectedAge in 31..45 -> if (selectedGender == "Female") "icon_age_f6" else "icon_age_m6"
+            selectedAge in 46..65 -> if (selectedGender == "Female") "icon_age_f7" else "icon_age_m7"
+            else -> if (selectedGender == "Female") "icon_age_f8" else "icon_age_m8"
         }
 
         val resId = resources.getIdentifier(iconName, "drawable", requireContext().packageName)
@@ -83,10 +86,8 @@ class AgeFragment : Fragment() {
     private fun updateNextButton() {
         if (selectedAge in 1..10) {
             btnNext.isEnabled = false
-            btnNext.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
         } else {
             btnNext.isEnabled = true
-            btnNext.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.purple_500))
         }
     }
 }

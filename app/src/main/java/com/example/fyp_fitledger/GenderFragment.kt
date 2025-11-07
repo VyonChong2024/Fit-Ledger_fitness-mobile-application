@@ -1,5 +1,6 @@
 package com.example.fyp_fitledger
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,23 +41,27 @@ class GenderFragment : Fragment() {
 
         cardMale.setOnClickListener {
             selectGender("Male")
-            cardMale.strokeColor = ContextCompat.getColor(requireContext(), R.color.teal_700)
-            view.findViewById<ImageView>(R.id.iconMale).setColorFilter(ContextCompat.getColor(requireContext(), R.color.teal_700))
-            view.findViewById<TextView>(R.id.tvMale).setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+            cardMale.alpha = 1.0f
+            cardMale.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.light_mint))
+            view.findViewById<ImageView>(R.id.iconMale).setColorFilter(ContextCompat.getColor(requireContext(), R.color.dark_teal))
+            view.findViewById<TextView>(R.id.tvMale).setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_teal))
 
-            cardFemale.strokeColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
-            view.findViewById<ImageView>(R.id.iconFemale).setColorFilter(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
-            view.findViewById<TextView>(R.id.tvFemale).setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
+            cardFemale.alpha = 0.8f
+            cardFemale.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.grayish_blue))
+            view.findViewById<ImageView>(R.id.iconFemale).setColorFilter(ContextCompat.getColor(requireContext(), R.color.light_grayish_blue))
+            view.findViewById<TextView>(R.id.tvFemale).setTextColor(ContextCompat.getColor(requireContext(), R.color.light_grayish_blue))
         }
         cardFemale.setOnClickListener {
             selectGender("Female")
-            cardMale.strokeColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
-            view.findViewById<ImageView>(R.id.iconMale).setColorFilter(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
-            view.findViewById<TextView>(R.id.tvMale).setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
+            cardMale.alpha = 0.8f
+            cardMale.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.grayish_blue))
+            view.findViewById<ImageView>(R.id.iconMale).setColorFilter(ContextCompat.getColor(requireContext(), R.color.light_grayish_blue))
+            view.findViewById<TextView>(R.id.tvMale).setTextColor(ContextCompat.getColor(requireContext(), R.color.light_grayish_blue))
 
-            cardFemale.strokeColor = ContextCompat.getColor(requireContext(), R.color.teal_700)
-            view.findViewById<ImageView>(R.id.iconFemale).setColorFilter(ContextCompat.getColor(requireContext(), R.color.teal_700))
-            view.findViewById<TextView>(R.id.tvFemale).setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+            cardFemale.alpha = 1.0f
+            cardFemale.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.light_mint))
+            view.findViewById<ImageView>(R.id.iconFemale).setColorFilter(ContextCompat.getColor(requireContext(), R.color.dark_teal))
+            view.findViewById<TextView>(R.id.tvFemale).setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_teal))
 
         }
 

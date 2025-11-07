@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Disabled state -->
+    <item android:color="@color/soft_gray" android:state_enabled="false"/>
+    <!-- Pressed state -->
+    <item android:color="@color/light_mint" android:state_pressed="true"/>
+    <!-- Default (enabled but not pressed) -->
+    <item android:color="@color/dark_brand_green"/>
+</selector>

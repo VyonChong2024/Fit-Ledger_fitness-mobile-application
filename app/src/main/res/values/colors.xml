@@ -28,4 +28,16 @@
     <color name="white">#FFFFFFFF</color>
     <color name="japanese_laurel">#2e7d32</color>
 
+    //Gradient BG color
+    <color name="dark_teal">#1E5950</color> //gradient start, Primary text
+    <color name="light_mint">#9acab6</color> //gradient end, Icons
+
+    //Text button color
+    <color name="off_white">#F5F5F5</color> //secondary text
+    <color name="bright_orange">#FF6B6B</color> //accent text
+
+    //Button, Element color
+    <color name="dark_brand_green">#234F47</color> //Primary Button (Dark)
+    <color name="light_rose">#F0C4C8</color> //Secondary Button (Light)
+    <color name="soft_gray">#AAAAAA</color> //inactive
 </resources>

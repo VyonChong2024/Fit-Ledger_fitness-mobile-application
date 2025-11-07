@@ -5,14 +5,14 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="20dp"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_225">
 
     <TextView
         android:text="Select Your Age"
-        android:textSize="40sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="60dp"
@@ -41,7 +41,7 @@
         android:id="@+id/tvAge"
         android:text="Age: 18"
         android:textSize="22sp"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -53,5 +53,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:backgroundTint="@color/button_color"
         android:enabled="true"/>
 </LinearLayout>
