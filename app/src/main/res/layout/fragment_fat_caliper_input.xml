@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="30dp"
     android:gravity="center"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_315">
 
     <LinearLayout
         android:id="@+id/containerChest"
@@ -21,7 +22,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
-            android:textColor="@color/teal_700"/>
+            android:textColor="@color/off_white"/>
 
         <EditText
             android:id="@+id/etChest"
@@ -52,7 +53,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
-            android:textColor="@color/teal_700"/>
+            android:textColor="@color/off_white"/>
 
         <EditText
             android:id="@+id/etTricep"
@@ -83,7 +84,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
-            android:textColor="@color/teal_700"/>
+            android:textColor="@color/off_white"/>
 
         <EditText
             android:id="@+id/etAbdomen"
@@ -114,7 +115,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
-            android:textColor="@color/teal_700"/>
+            android:textColor="@color/off_white"/>
 
         <EditText
             android:id="@+id/etSuprailiac"
@@ -145,7 +146,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
-            android:textColor="@color/teal_700"/>
+            android:textColor="@color/off_white"/>
 
         <EditText
             android:id="@+id/etThigh"
@@ -171,13 +172,14 @@
         android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/cmTextView"
+            android:id="@+id/mmTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="mm"
+            android:textStyle="bold"
             android:textAlignment="textEnd"
             android:textSize="20sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/dark_brand_green"/>
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/unitSwitch"
@@ -198,7 +200,7 @@
             android:text="inch"
             android:textAlignment="textStart"
             android:textSize="20sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/gray"/>
     </LinearLayout>
 
     <Button
@@ -209,5 +211,6 @@
         android:layout_marginTop="32dp"
         android:layout_gravity="center_horizontal"
         android:padding="12dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:backgroundTint="@color/button_color"/>
 </LinearLayout>

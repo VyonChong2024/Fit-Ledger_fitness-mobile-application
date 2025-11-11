@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_225">>
 
     <TextView
         android:layout_width="wrap_content"
@@ -14,7 +14,7 @@
         android:text="Select Your Activity Level"
         android:textSize="22sp"
         android:textAlignment="center"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:textStyle="bold"
         android:shadowRadius="2"
         android:shadowColor="@color/gray"/>
@@ -24,7 +24,8 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginTop="10dp"
-        android:src="@drawable/icon_al_3" />
+        android:src="@drawable/icon_al_3"
+        app:tint="@color/light_grey"/>
 
     <com.google.android.material.slider.Slider
         android:id="@+id/slider_activity_level"
@@ -34,7 +35,11 @@
         android:valueTo="5"
         android:stepSize="1"
         android:value="3"
-        app:labelBehavior="gone"/>
+        app:labelBehavior="gone"
+        app:trackColorActive="@color/grayish_lime_green"
+        app:trackColorInactive="@color/soft_gray"
+        app:thumbColor="@color/grayish_lime_green"
+        app:haloColor="@color/light_grayish_cyan"/>
 
     <TextView
         android:id="@+id/tv_activity_level"
@@ -42,8 +47,7 @@
         android:layout_height="wrap_content"
         android:text="Moderately Active"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@color/teal_200"
+        android:textColor="@color/light_grey"
         android:gravity="center"
         android:layout_marginBottom="20dp"/>
 
@@ -53,7 +57,7 @@
         android:text="Select Your Activity Frequency"
         android:textSize="22sp"
         android:textAlignment="center"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:textStyle="bold"
         android:shadowRadius="2"
         android:shadowColor="@color/gray"/>
@@ -63,7 +67,8 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginTop="10dp"
-        android:src="@drawable/icon_af_3" />
+        android:src="@drawable/icon_af_3"
+        app:tint="@color/light_grey"/>
 
     <com.google.android.material.slider.Slider
         android:id="@+id/slider_activity_frequency"
@@ -73,7 +78,11 @@
         android:valueTo="5"
         android:stepSize="1"
         android:value="3"
-        app:labelBehavior="gone"/>
+        app:labelBehavior="gone"
+        app:trackColorActive="@color/grayish_lime_green"
+        app:trackColorInactive="@color/soft_gray"
+        app:thumbColor="@color/grayish_lime_green"
+        app:haloColor="@color/light_grayish_cyan"/>
 
     <TextView
         android:id="@+id/tv_activity_frequency"
@@ -81,8 +90,7 @@
         android:layout_height="wrap_content"
         android:text="Regularly"
         android:textSize="16sp"
-        android:textColor="@color/teal_200"
-        android:textStyle="bold"
+        android:textColor="@color/light_grey"
         android:gravity="center"
         android:layout_marginBottom="20dp"/>
 
@@ -92,5 +100,5 @@
         android:layout_height="wrap_content"
         android:text="Next"
         android:layout_marginTop="24dp"
-        android:enabled="false"/>
+        android:backgroundTint="@color/button_color"/>
 </LinearLayout>

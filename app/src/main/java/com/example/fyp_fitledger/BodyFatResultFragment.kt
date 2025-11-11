@@ -87,7 +87,7 @@ class BodyFatResultFragment : Fragment() {
                     currentValue[i] = (currentValue[i].digitToInt() + 1).digitToChar()
                     textView.text = currentValue.joinToString("")
                     Log.d("BodyFatResult", "For-loop: loop $i")
-                    delay(400)
+                    delay(100)
                 }
             } else {
                 currentValue[i] = targetValue[i]

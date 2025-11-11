@@ -11,15 +11,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.TextView
-import android.widget.Toast
 import java.util.Locale
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.text.format
 
 class HeightWeightFragment : Fragment() {
@@ -169,6 +164,39 @@ class HeightWeightFragment : Fragment() {
             //findNavController().navigate(R.id.action_to_bodyMetricsFragment)
         }
 
+        tvHeight.setOnClickListener {
+            ValuePickerDialog(
+                title = "Select Height",
+                values = if (isCm) (50..220).toList() else (1..8).toList(),
+                currentValue = (if (isCm) heightCm else heightFeet).toInt(),
+            ) { selected ->
+                if (isCm) {
+                    heightCm = selected.toDouble()
+                    heightFeet = cmtofeet(heightCm)
+                } else {
+                    heightFeet = selected.toDouble()
+                    heightCm = feettocm(heightFeet)
+                }
+                updateHeightDisplay()
+            }.show(parentFragmentManager, "HeightPicker")
+        }
+
+        tvWeight.setOnClickListener {
+            ValuePickerDialog(
+                title = "Select Weight",
+                values = if (isKg) (30..200).toList() else (60..440).toList(),
+                currentValue = (if (isKg) weightKg else weightLbs).toInt(),
+            ) { selected ->
+                if (isKg) {
+                    weightKg = selected.toDouble()
+                    weightLbs = kgtolbs(weightKg)
+                } else {
+                    weightLbs = selected.toDouble()
+                    weightKg = lbstokg(weightLbs)
+                }
+                updateWeightDisplay()
+            }.show(parentFragmentManager, "WeightPicker")
+        }
         return view
     }
 

@@ -2,21 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:gravity="center"
     android:padding="20dp"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_90">
 
     <TextView
         android:id="@+id/tvQuestion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Do you want a more accurate body fat calculation?"
-        android:textSize="30sp"
         android:textAlignment="center"
+        android:textSize="30sp"
         android:textStyle="bold"
         android:paddingBottom="35dp"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:shadowRadius="2"
         android:shadowColor="@color/gray"/>
 
@@ -25,7 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Yes"
-        android:padding="10dp" />
+        android:padding="10dp"
+        app:backgroundTint="@color/button_color" />
 
     <Button
         android:id="@+id/btnNo"
@@ -33,7 +35,8 @@
         android:layout_height="wrap_content"
         android:text="No"
         android:padding="10dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        app:backgroundTint="@color/button_color"/>
 
     <Button
         android:id="@+id/btnMaybe"
@@ -41,5 +44,6 @@
         android:layout_height="wrap_content"
         android:text="Maybe Next Time"
         android:padding="10dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        app:backgroundTint="@color/grayish_blue"/>
 </LinearLayout>

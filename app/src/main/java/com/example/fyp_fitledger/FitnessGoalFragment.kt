@@ -1,13 +1,11 @@
 package com.example.fyp_fitledger
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 
 class FitnessGoalFragment : Fragment(R.layout.fragment_fitness_goal) {
     private val workoutPlanViewModel: WorkoutPlanViewModel by activityViewModels()
@@ -30,7 +28,6 @@ class FitnessGoalFragment : Fragment(R.layout.fragment_fitness_goal) {
                 toggleSelection(button)
 
                 btnNext.isEnabled = selectedGoals.isNotEmpty()
-                btnNext.setBackgroundColor(ContextCompat.getColor(requireContext(), if (btnNext.isEnabled) R.color.purple_500 else R.color.gray))
             }
         }
 

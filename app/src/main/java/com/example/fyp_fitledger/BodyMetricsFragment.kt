@@ -1,6 +1,5 @@
 package com.example.fyp_fitledger
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,12 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -27,6 +25,7 @@ class BodyMetricsFragment : Fragment() {
 
     private var bmi: Double = 0.0
     private var bodyFatPercentage: Double = 0.0
+    private var animationJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +54,6 @@ class BodyMetricsFragment : Fragment() {
             userViewModel.saveToPreferences(requireContext())
             (activity as? DemographicActivity)?.addFragment("AccurateMeasurementFragment")
             (activity as? DemographicActivity)?.nextPage()
-            //findNavController().navigate(R.id.action_to_accurateMeasurementFragment)
         }
 
         return view
@@ -77,7 +75,10 @@ class BodyMetricsFragment : Fragment() {
                 (1.20 * bmi) + (0.23 * age) - 5.4
             }
 
-            displayDataSlowly(bmi, bodyFatPercentage)
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(300)  //short delay execute function before page fully loaded
+                animateMetricsDisplay(bmi, bodyFatPercentage)
+            }
             Log.d("BodyMetricsFragment", "BMI: $bmi, BodyFat: $bodyFatPercentage")
         } else {
             tvBMIValue.text = "Invalid Data"
@@ -85,19 +86,38 @@ class BodyMetricsFragment : Fragment() {
         }
     }
 
-    private fun displayDataSlowly(bmi: Double, bodyFatPercentage: Double) = CoroutineScope(Dispatchers.Main).launch {
-        CoroutineScope(Dispatchers.Main).launch { // Launch a coroutine here
-            animateValue(tvBMIValue, bmi)
-            animateValue(tvBodyFatValue, bodyFatPercentage)
+    private fun animateMetricsDisplay(bmi: Double, bodyFatPercentage: Double) {
+        animationJob?.cancel()
+        btnNext.isEnabled = false
+
+        animationJob = CoroutineScope(Dispatchers.Main).launch {
+            // Animate both metrics simultaneously
+            val bmiJob = launch { animateDigits(tvBMIValue, bmi) }
+            val bodyFatJob = launch { animateDigits(tvBodyFatValue, bodyFatPercentage) }
+
+            // Wait until both done
+            bmiJob.join()
+            bodyFatJob.join()
+
             btnNext.isEnabled = true
         }
     }
 
-    private suspend fun animateValue(textView: TextView, targetValue: Double) {
-        val steps = (targetValue * 10).toInt()
-        for (i in 0..steps) {
-            textView.text = String.format(Locale.getDefault(),"%.1f", i / 10.0)
-            delay(20) // Non-blocking delay
+    private suspend fun animateDigits(textView: TextView, targetValue: Double) {
+        val formatted = String.format(Locale.getDefault(), "%.1f", targetValue)
+        val digits = formatted.toCharArray()
+
+        val current = CharArray(digits.size) { if (digits[it] == '.') '.' else '0' }
+
+        for (i in digits.indices) {
+            if (digits[i] == '.') continue
+
+            val targetDigit = digits[i].digitToInt()
+            for (d in 0..targetDigit) {
+                current[i] = ('0'.code + d).toChar()
+                textView.text = current.concatToString()
+                delay(100) // small delay per digit
+            }
         }
     }
 }

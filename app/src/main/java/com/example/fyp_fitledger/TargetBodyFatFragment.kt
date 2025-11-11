@@ -84,6 +84,16 @@ class TargetBodyFatFragment : Fragment() {
             false
         }
 
+        tvTargetBodyFat.setOnClickListener {
+            ValuePickerDialog(
+                title = "Select Body Fat Percentage",
+                values = (2..40).toList(),
+                currentValue = bodyFat.toInt(),
+            ) { selected ->
+                bodyFat = selected.toDouble()
+                updateWeightDisplay()
+            }.show(parentFragmentManager, "BodyFatPicker")
+        }
 
         btnNext.setOnClickListener {
             val targetBodyFat = tvTargetBodyFat.text.toString().toDoubleOrNull()

@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_90">
 
     <TextView
         android:layout_width="wrap_content"
@@ -14,7 +14,7 @@
         android:text="Select Your Prefer Workout Duration"
         android:textSize="35sp"
         android:textAlignment="center"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:textStyle="bold"
         android:layout_marginBottom="20dp"
         android:shadowRadius="2"
@@ -26,7 +26,8 @@
         android:layout_height="150dp"
         android:layout_marginTop="10dp"
         android:src="@drawable/icon_time_2"
-        app:tint="@color/grayish_lime_green"/>
+        app:tint="@color/light_grey"/>
+
 
     <com.google.android.material.slider.Slider
         android:id="@+id/slider_workout_time"
@@ -36,7 +37,11 @@
         android:valueTo="135"
         android:stepSize="15"
         android:value="60"
-        app:labelBehavior="gone"/>
+        app:labelBehavior="gone"
+        app:trackColorActive="@color/grayish_lime_green"
+        app:trackColorInactive="@color/soft_gray"
+        app:thumbColor="@color/grayish_lime_green"
+        app:haloColor="@color/light_grayish_cyan"/>
 
     <TextView
         android:id="@+id/tv_workout_time"
@@ -45,7 +50,7 @@
         android:text="1 Hour"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@color/teal_200"
+        android:textColor="@color/light_grey"
         android:gravity="center"
         android:layout_marginBottom="20dp"/>
 
@@ -54,5 +59,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Generate Workout Plan"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="24dp"
+        app:backgroundTint="@color/button_color"/>
 </LinearLayout>

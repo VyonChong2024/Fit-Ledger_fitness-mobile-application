@@ -105,14 +105,14 @@ class TapeMeasureInputFragment : Fragment() {
     private fun updateUnitTextStyle(cmTextView: TextView, inchTextView: TextView) {
         if (isCm) {
             cmTextView.setTypeface(null, Typeface.BOLD)
-            cmTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+            cmTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_brand_green))
             inchTextView.setTypeface(null, Typeface.NORMAL)
-            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
         } else {
             inchTextView.setTypeface(null, Typeface.BOLD)
-            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_brand_green))
             cmTextView.setTypeface(null, Typeface.NORMAL)
-            cmTextView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+            cmTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
         }
     }
 

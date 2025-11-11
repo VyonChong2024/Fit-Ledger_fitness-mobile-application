@@ -21,7 +21,7 @@ import java.util.Locale
 class FatCaliperInputFragment: Fragment() {
 
     private lateinit var userViewModel: UserViewModel
-    private var ismm = true // Default to cm
+    private var ismm = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +44,7 @@ class FatCaliperInputFragment: Fragment() {
         val btnCalculate = view.findViewById<Button>(R.id.btnCalculate)
 
         val unitSwitch = view.findViewById<SwitchCompat>(R.id.unitSwitch)
-        val cmTextView = view.findViewById<TextView>(R.id.cmTextView)
+        val mmTextView = view.findViewById<TextView>(R.id.mmTextView)
         val inchTextView = view.findViewById<TextView>(R.id.inchTextView)
 
         userViewModel = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
@@ -67,11 +67,11 @@ class FatCaliperInputFragment: Fragment() {
             Log.e("FatCaliperInputFragment", "Invalid gender: $gender")
         }
 
-        updateUnitTextStyle(cmTextView, inchTextView)
+        updateUnitTextStyle(mmTextView, inchTextView)
 
         unitSwitch.setOnCheckedChangeListener { _, isChecked ->
             ismm = !isChecked
-            updateUnitTextStyle(cmTextView, inchTextView)
+            updateUnitTextStyle(mmTextView, inchTextView)
             convertInputs(etChest, etAbdomen, etTricep, etSuprailiac, etThigh)
         }
 
@@ -91,21 +91,16 @@ class FatCaliperInputFragment: Fragment() {
                 thigh = convertInchTomm(thigh!!)
             }
 
-            // Validate inputs
-            if (gender == "Male" && (chest == null || abdomen == null || thigh == null)) {
-                Toast.makeText(context, "Please enter valid values for Chest, Abdomen, and Thigh.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (gender == "Female" && (tricep == null || suprailiac == null || thigh == null)) {
-                Toast.makeText(context, "Please enter valid values for Tricep, Suprailiac, and Thigh.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val skinfolds = listOfNotNull(chest, abdomen, tricep, suprailiac, thigh) // Validate reasonable range (3mm - 50mm)
-            if (skinfolds.any { it < 3 || it > 50 }) {
-                Toast.makeText(context, "Skinfold values should be between 3mm and 50mm.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
+            val isValid = validateInput(
+                gender = gender?: "",
+                chest = chest?.toInt(),
+                abdomen = abdomen?.toInt(),
+                tricep = tricep?.toInt(),
+                suprailiac = suprailiac?.toInt(),
+                thigh = thigh?.toInt(),
+                context = requireContext()
+            )
+            if (!isValid) return@setOnClickListener
 
             // Calculate Body Fat Percentage
             val bodyDensity = if (gender == "Male") {
@@ -120,38 +115,36 @@ class FatCaliperInputFragment: Fragment() {
             // Convert Body Density to Body Fat Percentage
             val bodyFatPercentage = (495 / bodyDensity) - 450
 
-
             userViewModel.updateBodyDensity(bodyDensity)
             userViewModel.updateBodyFatPercent(bodyFatPercentage)
             Log.d("BodyFatCalc - FatCaliper", "Body Fat: $bodyFatPercentage; Body Density: $bodyDensity")
 
             (activity as? DemographicActivity)?.addFragment("BodyFatResultFragment")
             (activity as? DemographicActivity)?.nextPage()
-            //findNavController().navigate(R.id.to_workoutPlanAdapter)
         }
 
         return view
     }
 
-    private fun convertmmToInch(cm: Double): Double {
-        return cm / 25.4
+    private fun convertmmToInch(mm: Double): Double {
+        return mm / 25.4
     }
 
     private fun convertInchTomm(inch: Double): Double {
         return inch * 25.4
     }
 
-    private fun updateUnitTextStyle(cmTextView: TextView, inchTextView: TextView) {
+    private fun updateUnitTextStyle(mmTextView: TextView, inchTextView: TextView) {
         if (ismm) {
-            cmTextView.setTypeface(null, Typeface.BOLD)
-            cmTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+            mmTextView.setTypeface(null, Typeface.BOLD)
+            mmTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_brand_green))
             inchTextView.setTypeface(null, Typeface.NORMAL)
-            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
         } else {
             inchTextView.setTypeface(null, Typeface.BOLD)
-            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
-            cmTextView.setTypeface(null, Typeface.NORMAL)
-            cmTextView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+            inchTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_brand_green))
+            mmTextView.setTypeface(null, Typeface.NORMAL)
+            mmTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
         }
     }
 
@@ -191,5 +184,29 @@ class FatCaliperInputFragment: Fragment() {
                 etAbdomen.setText(String.format(Locale.getDefault(),"%.1f", convertmmToInch(abdomen)))
             }
         }
+    }
+
+    private fun validateInput(gender: String, chest: Int?, abdomen: Int?, tricep: Int?, suprailiac: Int?, thigh: Int?, context: Context): Boolean {
+        val requiredParams = when (gender) {
+            "Male" -> listOf(chest, abdomen, thigh)
+            "Female" -> listOf(tricep, suprailiac, thigh)
+            else -> {
+                Log.e("FatCaliperInputFragment", "Invalid gender: $gender")
+                Toast.makeText(context, "Invalid gender selected.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+        }
+        // Check missing input
+        if (requiredParams.any { it == null }) {
+            Toast.makeText(context, "Please enter all required skinfold values.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        // Check range
+        if (requiredParams.any { it!! < 3 || it > 50 }) {
+            Toast.makeText(context, "Skinfold values must be between 3mm and 50mm.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        return true
     }
 }

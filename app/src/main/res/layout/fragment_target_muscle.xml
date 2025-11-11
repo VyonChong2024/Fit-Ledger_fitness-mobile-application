@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_180">
 
     <TextView
         android:id="@+id/tvSelectMuscle"
@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp"
         android:text="Select Target Muscle Groups"
         android:textAlignment="center"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/off_white"
         android:textSize="24sp"
         android:textStyle="bold"
         android:shadowRadius="2"
@@ -73,6 +73,7 @@
         android:layout_marginBottom="24dp"
         android:enabled="false"
         android:text="Next"
+        app:backgroundTint="@color/button_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

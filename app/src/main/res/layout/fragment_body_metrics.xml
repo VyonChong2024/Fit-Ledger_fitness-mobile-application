@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:gravity="center"
     android:padding="20dp"
-    android:background="@color/light_grayish_blue">
+    android:background="@drawable/fragment_bg_135">
 
     <TextView
         android:id="@+id/tvBMI"
@@ -15,7 +16,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textAlignment="center"
-        android:textColor="@color/teal_700" />
+        android:textColor="@color/off_white" />
 
     <TextView
         android:id="@+id/tvBMIValue"
@@ -29,7 +30,7 @@
         android:shadowDx="1"
         android:shadowDy="1"
         android:shadowRadius="2"
-        android:shadowColor="@color/black" />
+        android:shadowColor="@color/gray" />
 
     <TextView
         android:id="@+id/tvBodyFat"
@@ -40,7 +41,7 @@
         android:textStyle="bold"
         android:paddingTop="10dp"
         android:textAlignment="center"
-        android:textColor="@color/teal_700" />
+        android:textColor="@color/off_white" />
 
     <TextView
         android:id="@+id/tvBodyFatValue"
@@ -54,14 +55,15 @@
         android:shadowDx="1"
         android:shadowDy="1"
         android:shadowRadius="2"
-        android:shadowColor="@color/black" />
+        android:shadowColor="@color/gray" />
 
     <Button
         android:id="@+id/btnNext"
+        android:text="Next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Next"
         android:layout_marginTop="20dp"
+        app:backgroundTint="@color/button_color"
         android:enabled="false"/>
 
 </LinearLayout>

@@ -98,6 +98,23 @@ class TargetWeightFragment : Fragment() {
             updateWeightDisplay()
         }
 
+        tvTargetWeight.setOnClickListener {
+            ValuePickerDialog(
+                title = "Select Weight",
+                values = if (isKg) (30..200).toList() else (60..440).toList(),
+                currentValue = (if (isKg) weightKg else weightLbs).toInt(),
+            ) { selected ->
+                if (isKg) {
+                    weightKg = selected.toDouble()
+                    weightLbs = kgtolbs(weightKg)
+                } else {
+                    weightLbs = selected.toDouble()
+                    weightKg = lbstokg(weightLbs)
+                }
+                updateWeightDisplay()
+            }.show(parentFragmentManager, "WeightPicker")
+        }
+
         btnNext.setOnClickListener {
             val targetWeight = weightKg.format(2)
 
