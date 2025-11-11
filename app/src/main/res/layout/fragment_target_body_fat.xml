@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="What is your target body fat percentage?"
+        android:text="@string/frag_target_body_fat_header"
         android:textSize="40sp"
         android:textAlignment="center"
         android:textColor="@color/off_white"
@@ -42,7 +42,7 @@
 
             <TextView
                 android:id="@+id/tvTargetBodyFat"
-                android:text="00.0"
+                android:text="@string/frag_target_body_fat_label"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:gravity="center"
@@ -64,7 +64,7 @@
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         android:textColor="@color/white"
         android:layout_marginTop="16dp"
         app:backgroundTint="@color/button_color"/>

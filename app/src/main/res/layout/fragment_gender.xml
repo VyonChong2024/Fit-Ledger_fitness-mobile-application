@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="60dp"
-        android:text="Select Your Gender"
+        android:text="@string/frag_gender_header"
         android:textColor="@color/off_white"
         android:textAlignment="center"
         android:textSize="24sp"
@@ -57,7 +57,7 @@
 
                 <TextView
                     android:id="@+id/tvMale"
-                    android:text="Male"
+                    android:text="@string/frag_gender_m"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textAlignment="center"
@@ -98,7 +98,7 @@
 
                 <TextView
                     android:id="@+id/tvFemale"
-                    android:text="Female"
+                    android:text="@string/frag_gender_f"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textAlignment="center"
@@ -114,7 +114,7 @@
     <!-- Next Button (Hidden by Default) -->
     <Button
         android:id="@+id/btnNext"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"

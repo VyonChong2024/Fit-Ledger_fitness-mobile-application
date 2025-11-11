@@ -9,7 +9,7 @@
     android:background="@drawable/fragment_bg_225">
 
     <TextView
-        android:text="You had finish all tbe setup"
+        android:text="@string/frag_finish_setup_header_1"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -18,7 +18,7 @@
         android:textColor="@color/off_white"/>
 
     <TextView
-        android:text="Enjoy your healthy journey"
+        android:text="@string/frag_finish_setup_header_2"
         android:textSize="25sp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
         android:textColor="@color/off_white"/>
 
     <TextView
-        android:text="with"
+        android:text="@string/frag_finish_setup_header_3"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
         android:textColor="@color/off_white"/>
 
     <TextView
-        android:text="FitLedger"
+        android:text="@string/frag_finish_setup_header_4"
         android:textSize="40sp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -51,7 +51,7 @@
         android:id="@+id/btContinue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get Started"
+        android:text="@string/frag_btn_get_start"
         android:layout_marginTop="20dp"
         android:enabled="false"
         app:backgroundTint="@color/button_color"/>

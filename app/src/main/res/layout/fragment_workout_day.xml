@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app2="http://schemas.android.com/apk/res-auto"
-    xmlns:app="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:gravity="center"
     android:padding="20dp"
@@ -12,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Your Prefer Workout Days"
+        android:text="@string/frag_workout_day_header"
         android:textSize="35sp"
         android:textAlignment="center"
         android:textColor="@color/off_white"
@@ -85,8 +84,8 @@
         android:id="@+id/btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         android:layout_marginTop="24dp"
         android:enabled="false"
-        app:backgroundTint="@color/button_color"/>
+        app2:backgroundTint="@color/button_color"/>
 </LinearLayout>

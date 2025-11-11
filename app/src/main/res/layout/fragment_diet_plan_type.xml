@@ -12,7 +12,7 @@
         android:id="@+id/tvQuestion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select your Diet Plan?"
+        android:text="@string/frag_diet_plan_type_header"
         android:textSize="30sp"
         android:textAlignment="center"
         android:textStyle="bold"
@@ -50,7 +50,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Vegetarian"
+                    android:text="@string/frag_diet_plan_type_1_header"
                     android:textSize="20sp"
                     android:textColor="@color/white" />
 
@@ -72,7 +72,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="Excludes meat, may include dairy and/or eggs"
+                    android:text="@string/frag_diet_plan_type_1_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -102,7 +102,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="DASH"
+                    android:text="@string/frag_diet_plan_type_2_header"
                     android:textSize="20sp"
                     android:textColor="@color/white"/>
 
@@ -124,7 +124,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="Focus fruits, vegetables, low-fat dairy, limits sodium, sugar"
+                    android:text="@string/frag_diet_plan_type_2_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -160,7 +160,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Low-carb"
+                    android:text="@string/frag_diet_plan_type_3_header"
                     android:textSize="20sp"
                     android:textColor="@color/white" />
 
@@ -182,7 +182,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="Reduce grains, starches, focus on protein and fat"
+                    android:text="@string/frag_diet_plan_type_3_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -212,7 +212,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Mediterranean"
+                    android:text="@string/frag_diet_plan_type_4_header"
                     android:textSize="20sp"
                     android:textColor="@color/white"/>
 
@@ -234,7 +234,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="Fruits, vegetables, whole grains, healthy fats, fish"
+                    android:text="@string/frag_diet_plan_type_4_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -270,7 +270,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Paleo"
+                    android:text="@string/frag_diet_plan_type_5_header"
                     android:textSize="20sp"
                     android:textColor="@color/white" />
 
@@ -292,7 +292,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="unprocessed foods, excludes grains, legumes, dairy."
+                    android:text="@string/frag_diet_plan_type_5_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -322,7 +322,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Keto"
+                    android:text="@string/frag_diet_plan_type_6_header"
                     android:textSize="20sp"
                     android:textColor="@color/white"/>
 
@@ -344,7 +344,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="low-carb, high-fat diet"
+                    android:text="@string/frag_diet_plan_type_6_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -380,7 +380,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Zone"
+                    android:text="@string/frag_diet_plan_type_7_header"
                     android:textSize="20sp"
                     android:textColor="@color/white" />
 
@@ -402,7 +402,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="Balance diet, 40% carb, 30% protein, and 30% fat"
+                    android:text="@string/frag_diet_plan_type_7_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -432,7 +432,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Atkins"
+                    android:text="@string/frag_diet_plan_type_8_header"
                     android:textSize="20sp"
                     android:textColor="@color/white"/>
 
@@ -454,7 +454,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="low carb diet, focus on fat and protein"
+                    android:text="@string/frag_diet_plan_type_8_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -490,7 +490,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Gluten-free"
+                    android:text="@string/frag_diet_plan_type_9_header"
                     android:textSize="20sp"
                     android:textColor="@color/white" />
 
@@ -512,7 +512,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="excludes wheat, barley, rye, and foods with gluten"
+                    android:text="@string/frag_diet_plan_type_9_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -542,7 +542,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="16dp"
-                    android:text="Low-fat"
+                    android:text="@string/frag_diet_plan_type_10_header"
                     android:textSize="20sp"
                     android:textColor="@color/white"/>
 
@@ -564,7 +564,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="limit all kinds of     fat intake"
+                    android:text="@string/frag_diet_plan_type_10_label"
                     android:textSize="14sp"
                     android:textColor="@color/white"/>
             </androidx.cardview.widget.CardView>
@@ -577,6 +577,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:enabled="false"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         app:backgroundTint="@color/button_color" />
 </LinearLayout>

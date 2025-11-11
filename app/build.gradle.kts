@@ -1,9 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services") //Google Service Gradle Plugin
     id("kotlin-kapt")                       //food api plugin
+}
+
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
 }
 
 android {
@@ -18,6 +24,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "API_KEY", "\"${localProperties.getProperty("OPENAI_API_KEY")}\"")
+        buildConfigField("String", "WEB_CLIENT_ID", "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID")}\"")
+
+        manifestPlaceholders["WEB_CLIENT_ID"] = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID")
     }
 
     buildTypes {
@@ -31,10 +42,13 @@ android {
         //Newly Added
         debug {
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     buildFeatures {  //NEWLY ADDED
         viewBinding = true
+        compose = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -45,6 +59,9 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    signingConfigs {
+        getByName("debug")
     }
 }
 

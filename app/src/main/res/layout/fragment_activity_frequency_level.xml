@@ -6,12 +6,12 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="@drawable/fragment_bg_225">>
+    android:background="@drawable/fragment_bg_225">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Your Activity Level"
+        android:text="@string/frag_activ_lvl_header"
         android:textSize="22sp"
         android:textAlignment="center"
         android:textColor="@color/off_white"
@@ -45,7 +45,7 @@
         android:id="@+id/tv_activity_level"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Moderately Active"
+        android:text="@string/frag_activ_lvl_label"
         android:textSize="18sp"
         android:textColor="@color/light_grey"
         android:gravity="center"
@@ -54,7 +54,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Your Activity Frequency"
+        android:text="@string/frag_activ_freq_header"
         android:textSize="22sp"
         android:textAlignment="center"
         android:textColor="@color/off_white"
@@ -88,7 +88,7 @@
         android:id="@+id/tv_activity_frequency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Regularly"
+        android:text="@string/frag_activ_freq_label"
         android:textSize="16sp"
         android:textColor="@color/light_grey"
         android:gravity="center"
@@ -98,7 +98,7 @@
         android:id="@+id/btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         android:layout_marginTop="24dp"
         android:backgroundTint="@color/button_color"/>
 </LinearLayout>

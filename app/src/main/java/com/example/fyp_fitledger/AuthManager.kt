@@ -28,7 +28,7 @@ object AuthManager {
 
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)  //'false' -> Allows users to sign in with any Google account.
-            .setServerClientId(context.getString(R.string.web_client_id))
+            .setServerClientId(BuildConfig.WEB_CLIENT_ID)
             .setAutoSelectEnabled(false)
             //.setNonce()
             .build()

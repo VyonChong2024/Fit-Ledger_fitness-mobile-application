@@ -296,7 +296,7 @@ class DietLogActivity : AppCompatActivity() {
     }
 
     fun getResponse(question: String, image: ImageView, callback: (String) -> Unit) {
-        val apiKey = getString(R.string.api_key)
+        val apiKey = BuildConfig.API_KEY
         val url = "https://api.openai.com/v1/chat/completions"
 
         val jsonBody = JSONObject().apply {

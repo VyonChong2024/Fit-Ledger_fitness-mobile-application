@@ -8,7 +8,7 @@
     android:background="@drawable/fragment_bg_225">
 
     <TextView
-        android:text="Select Your Age"
+        android:text="@string/frag_age_header"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
@@ -39,7 +39,7 @@
     <!-- Display Selected Age -->
     <TextView
         android:id="@+id/tvAge"
-        android:text="Age: 18"
+        android:text="@string/frag_age_label"
         android:textSize="22sp"
         android:textColor="@color/off_white"
         android:layout_marginTop="10dp"
@@ -49,7 +49,7 @@
     <!-- Next Button (Disabled for ages 1-10) -->
     <Button
         android:id="@+id/btnNext"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"

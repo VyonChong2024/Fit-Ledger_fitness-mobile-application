@@ -55,7 +55,7 @@
             android:value="DEFAULT_SIGN_IN" />
         <meta-data
             android:name="com.google.android.gms.auth.api.credentials.WebClientId"
-            android:value="@string/web_client_id" />
+            android:value="${WEB_CLIENT_ID}" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

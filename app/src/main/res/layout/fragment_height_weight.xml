@@ -9,7 +9,7 @@
     android:background="@drawable/fragment_bg_180">
 
     <TextView
-        android:text="Select Your Height"
+        android:text="@string/frag_height_header"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
@@ -45,7 +45,7 @@
 
             <TextView
                 android:id="@+id/tvHeight"
-                android:text="170.0 cm"
+                android:text="@string/frag_height_label"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:gravity="center"
@@ -89,7 +89,7 @@
     </RadioGroup>
 
     <TextView
-        android:text="Select Your Weight"
+        android:text="@string/frag_weight_header"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
@@ -126,7 +126,7 @@
 
             <TextView
                 android:id="@+id/tvWeight"
-                android:text="65.0 kg"
+                android:text="@string/frag_weight_label"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:gravity="center"
@@ -172,7 +172,7 @@
     <!-- Next Button -->
     <Button
         android:id="@+id/btnNext"
-        android:text="Next"
+        android:text="@string/frag_btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"

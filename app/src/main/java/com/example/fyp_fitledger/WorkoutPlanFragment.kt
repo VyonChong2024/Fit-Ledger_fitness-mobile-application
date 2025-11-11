@@ -173,7 +173,7 @@ class WorkoutPlanFragment: Fragment() {
     private fun Double.format(digits: Int) = "%.${digits}f".format(this).toDouble()
 
     fun getResponse(question: String, callback: (String) -> Unit) {
-        val apiKey = getString(R.string.api_key)
+        val apiKey = BuildConfig.API_KEY
         val url = "https://api.openai.com/v1/chat/completions"
 
         val jsonBody = JSONObject()

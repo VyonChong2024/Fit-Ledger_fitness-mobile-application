@@ -12,7 +12,7 @@
         android:id="@+id/tvQuestion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Do you want to customize your workout plan?"
+        android:text="@string/frag_cust_workout_header"
         android:textAlignment="center"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -25,14 +25,14 @@
         android:id="@+id/btnYes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Yes"
+        android:text="@string/frag_btn_yes"
         app:backgroundTint="@color/button_color" />
 
     <Button
         android:id="@+id/btnNo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No"
+        android:text="@string/frag_btn_no"
         android:layout_marginTop="10dp"
         app:backgroundTint="@color/button_color" />
 
@@ -40,7 +40,7 @@
         android:id="@+id/btnMaybeNextTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Maybe next time"
+        android:text="@string/frag_btn_nexttime"
         android:layout_marginTop="10dp"
         app:backgroundTint="@color/grayish_blue" />
 </LinearLayout>

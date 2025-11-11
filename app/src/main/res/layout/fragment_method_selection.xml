@@ -12,7 +12,7 @@
         android:id="@+id/tvChooseMethod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose a method for accurate body fat calculation"
+        android:text="@string/frag_method_select_header"
         android:textAlignment="center"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -25,7 +25,7 @@
         android:id="@+id/btnTapeMeasure"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tape Measure Method"
+        android:text="@string/frag_method_select_option_1"
         android:padding="10dp"
         app:backgroundTint="@color/button_color"/>
 
@@ -33,7 +33,7 @@
         android:id="@+id/btnFatCaliper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Fat Caliper Method"
+        android:text="@string/frag_method_select_option_2"
         android:padding="10dp"
         android:layout_marginTop="10dp"
         app:backgroundTint="@color/button_color"/>

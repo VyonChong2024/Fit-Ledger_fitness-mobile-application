@@ -17,7 +17,7 @@
 
         <TextView
             android:layout_width="100dp" android:layout_height="wrap_content"
-            android:text="Neck:"
+            android:text="@string/frag_tape_meas_input_label_1"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
@@ -49,7 +49,7 @@
         <TextView
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="Waist:"
+            android:text="@string/frag_tape_meas_input_label_2"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
@@ -80,7 +80,7 @@
 
         <TextView
             android:layout_width="100dp" android:layout_height="wrap_content"
-            android:text="Hips:"
+            android:text="@string/frag_tape_meas_input_label_3"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textAlignment="textEnd"
@@ -145,10 +145,12 @@
         android:id="@+id/btnCalculate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="     Calculate     "
+        android:text="@string/frag_btn_cont"
         android:layout_marginTop="32dp"
         android:layout_gravity="center_horizontal"
         android:padding="12dp"
+        android:paddingStart="35dp"
+        android:paddingEnd="35dp"
         android:textSize="18sp"
         app:backgroundTint="@color/button_color"/>
 </LinearLayout>
