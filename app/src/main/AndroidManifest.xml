@@ -21,7 +21,7 @@
         android:theme="@style/Theme.FYP_FitLedger"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:exported="true"
             android:label="@string/display_app_name"
             android:theme="@style/Theme.FYP_FitLedger"
@@ -32,23 +32,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DemographicActivity"
+        <activity android:name=".ui.activity.DemographicActivity"
             android:theme="@style/Theme.FYP_FitLedger" />
-        <activity android:name=".HomeActivity" />
+        <activity android:name=".ui.activity.HomeActivity" />
 
-        <activity android:name=".DietActivity"/>
-        <activity android:name=".DietLogActivity"/>
-        <activity android:name=".FoodListActivity"/>
+        <activity android:name=".ui.activity.DietActivity"/>
+        <activity android:name=".ui.activity.DietLogActivity"/>
+        <activity android:name=".ui.activity.FoodListActivity"/>
 
-        <activity android:name=".WorkoutActivity"/>
-        <activity android:name=".ExerciseListActivity"/>
-        <activity android:name=".ExerciseDetailActivity"/>
+        <activity android:name=".ui.activity.WorkoutActivity"/>
+        <activity android:name=".ui.activity.ExerciseListActivity"/>
+        <activity android:name=".ui.activity.ExerciseDetailActivity"/>
         <activity
-            android:name=".WorkoutLogActivity"
+            android:name=".ui.activity.WorkoutLogActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"/>
 
-        <activity android:name=".MoreActivity"/>
+        <activity android:name=".ui.activity.MoreActivity"/>
 
         <meta-data
             android:name="com.google.android.gms.auth.api.identity.SIGN_IN_OPTIONS"

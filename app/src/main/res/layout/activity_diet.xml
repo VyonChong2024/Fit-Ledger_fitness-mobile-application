@@ -58,7 +58,7 @@
                     android:textColor="@color/teal_700"
                     android:textSize="20sp" />
 
-                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:android="http://schemas.android.com/apk/res/android"
+                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:android="http://schemas.android.com/apk/res/android"
                     xmlns:app="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/pctRingCalories"
                     android:layout_width="100dp"
@@ -100,7 +100,7 @@
                         android:layout_marginEnd="20dp"
                         android:orientation="vertical">
 
-                        <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                        <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                             android:id="@+id/pctRingCarbs"
                             android:layout_width="80dp"
                             android:layout_height="80dp"
@@ -127,7 +127,7 @@
                         android:layout_marginEnd="20dp"
                         android:orientation="vertical">
 
-                        <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                        <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                             android:id="@+id/pctRingFat"
                             android:layout_width="80dp"
                             android:layout_height="800dp"
@@ -152,7 +152,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                        <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                        <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                             android:id="@+id/pctRingProtein"
                             android:layout_width="80dp"
                             android:layout_height="80dp"
@@ -218,7 +218,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingIron"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -244,7 +244,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingCalcium"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -270,7 +270,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingPotassium"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -296,7 +296,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingMagnesium"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -322,7 +322,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingZinc"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -347,7 +347,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingSodium"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -414,7 +414,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingVitaminD"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -440,7 +440,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingVitaminA"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -466,7 +466,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingVitaminB12"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -492,7 +492,7 @@
                                 android:layout_marginEnd="15dp"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingVitaminC"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
@@ -517,7 +517,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical">
 
-                                <com.example.fyp_fitledger.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
+                                <com.example.fyp_fitledger.ui.component.CircularPercentageRingView xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:id="@+id/pctRingVitaminK"
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"

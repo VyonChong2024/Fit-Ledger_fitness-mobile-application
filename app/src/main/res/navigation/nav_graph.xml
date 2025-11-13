@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/heightWeightFragment"
-        android:name="com.example.fyp_fitledger.HeightWeightFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.HeightWeightFragment"
         app:layout="@layout/fragment_height_weight">
         <action
             android:id="@+id/action_to_bodyMetricsFragment"
@@ -14,7 +14,7 @@
 
     <fragment
         android:id="@+id/bodyMetricsFragment"
-        android:name="com.example.fyp_fitledger.BodyMetricsFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.BodyMetricsFragment"
         app:layout="@layout/fragment_body_metrics">
         <action
             android:id="@+id/action_to_accurateMeasurementFragment"
@@ -23,7 +23,7 @@
 
     <fragment
         android:id="@+id/accurateMeasurementFragment"
-        android:name="com.example.fyp_fitledger.AccurateMeasurementFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.AccurateMeasurementFragment"
         app:layout="@layout/fragment_accurate_measurement">
         <action
             android:id="@+id/action_accurateMeasurementFragment_to_methodSelectionFragment"
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/methodSelectionFragment"
-        android:name="com.example.fyp_fitledger.MethodSelectionFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.MethodSelectionFragment"
         app:layout="@layout/fragment_method_selection">
         <action
             android:id="@+id/action_methodSelectionFragment_to_tapeMeasureFragment"
@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/tapeMeasureFragment"
-        android:name="com.example.fyp_fitledger.TapeMeasureFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.TapeMeasureFragment"
         app:layout="@layout/fragment_tape_measure">
         <action
             android:id="@+id/action_tapeMeasureFragment_to_tapeMeasureInputFragment"
@@ -56,7 +56,7 @@
 
     <fragment
         android:id="@+id/fatCaliperFragment"
-        android:name="com.example.fyp_fitledger.FatCaliperFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.FatCaliperFragment"
         app:layout="@layout/fragment_fat_caliper">
         <action
             android:id="@+id/action_fatCaliperFragment_to_measurementInputFragment"
@@ -65,7 +65,7 @@
 
     <fragment
         android:id="@+id/tapeMeasureInputFragment"
-        android:name="com.example.fyp_fitledger.TapeMeasureInputFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.TapeMeasureInputFragment"
         app:layout="@layout/fragment_tape_measure_input">
         <action
             android:id="@+id/action_tapeMeasureInputFragment_to_bodyFatResultFragment"
@@ -74,7 +74,7 @@
 
     <fragment
         android:id="@+id/fatCaliperInputFragment"
-        android:name="com.example.fyp_fitledger.FatCaliperInputFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.FatCaliperInputFragment"
         app:layout="@layout/fragment_fat_caliper_input">
         <action
             android:id="@+id/action_fatCaliperInputFragment_to_bodyFatResultFragment"
@@ -83,7 +83,7 @@
 
     <fragment
         android:id="@+id/bodyFatResultFragment"
-        android:name="com.example.fyp_fitledger.BodyFatResultFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.BodyFatResultFragment"
         app:layout="@layout/fragment_body_fat_result">
         <action
             android:id="@+id/to_workoutPlanAdapter"
@@ -92,7 +92,7 @@
 
     <fragment
         android:id="@+id/customizeWorkoutFragment"
-        android:name="com.example.fyp_fitledger.CustomizeWorkoutFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.CustomizeWorkoutFragment"
         android:label="Customize Workout">
 
         <action
@@ -106,7 +106,7 @@
 
     <fragment
         android:id="@+id/fitnessGoalFragment"
-        android:name="com.example.fyp_fitledger.FitnessGoalFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.FitnessGoalFragment"
         android:label="Fitness Goals">
         <action
             android:id="@+id/action_fitnessGoalFragment_to_targetWeightFragment"
@@ -115,7 +115,7 @@
 
     <fragment
         android:id="@+id/targetWeightFragment"
-        android:name="com.example.fyp_fitledger.TargetWeightFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.TargetWeightFragment"
         android:label="Fitness Goals">
         <action
             android:id="@+id/action_targetWeightFragment_to_targetBodyFatFragment"
@@ -124,7 +124,7 @@
 
     <fragment
         android:id="@+id/targetBodyFatFragment"
-        android:name="com.example.fyp_fitledger.TargetBodyFatFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.TargetBodyFatFragment"
         android:label="Fitness Goals">
         <action
             android:id="@+id/action_targetBodyFatFragment_to_activityLevelFragment"
@@ -133,7 +133,7 @@
 
     <fragment
         android:id="@+id/activityLevelFrequencyFragment"
-        android:name="com.example.fyp_fitledger.ActivityLevelFrequencyFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.ActivityLevelFrequencyFragment"
         android:label="Fitness Goals">
         <action
             android:id="@+id/action_activityLevelFragment_to_targetMuscleFragment"
@@ -142,7 +142,7 @@
 
     <fragment
         android:id="@+id/targetMuscleFragment"
-        android:name="com.example.fyp_fitledger.TargetMuscleFragment"
+        android:name="com.example.fyp_fitledger.ui.fragment.TargetMuscleFragment"
         android:label="Fitness Goals">
         <action
             android:id="@+id/action_targetMuscleFragment_to_workoutPlaceFragment"

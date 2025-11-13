@@ -48,9 +48,11 @@
     <string name="frag_fat_cali_step_1">Prepare a Body Fat Caliper</string>
     <string name="frag_fat_cali_step_2">Relax and stand naturally</string>
     <string name="frag_fat_cali_step_3">Pinch the Chest skin</string>
+    <string name="frag_fat_cali_step_3_female">Pinch the Tricep skin</string>
     <string name="frag_fat_cali_step_4">Position the Caliper</string>
     <string name="frag_fat_cali_step_5">Read and record the value</string>
     <string name="frag_fat_cali_step_6">Repeat for Abdomen and Thigh</string>
+    <string name="frag_fat_cali_step_6_female">Repeat for Suprailiac &amp; Thigh</string>
     <string name="frag_fat_cali_input_label_1">Chest:</string>
     <string name="frag_fat_cali_input_label_2">Tricep:</string>
     <string name="frag_fat_cali_input_label_3">Abdomen:</string>
@@ -81,6 +83,7 @@
     <string name="frag_tape_meas_step_3">Exhale, relax your muscle</string>
     <string name="frag_tape_meas_step_4">Read and record the value</string>
     <string name="frag_tape_meas_step_5">Repeat for Abdomen</string>
+    <string name="frag_tape_meas_step_5_female">Repeat for waist &amp; hips</string>
     <string name="frag_tape_meas_input_label_1">Neck:</string>
     <string name="frag_tape_meas_input_label_2">Waist:</string>
     <string name="frag_tape_meas_input_label_3">Hips:</string>

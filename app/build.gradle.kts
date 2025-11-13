@@ -4,10 +4,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services") //Google Service Gradle Plugin
-    id("kotlin-kapt")                       //food api plugin
+    id("com.google.gms.google-services") //Google Service Plugin (for Firebase)
+    id("kotlin-kapt")                    //Kotlin annotation processor (for Room, Glide, etc.)
 }
 
+// Load sensitive keys (OpenAI API key, Google Web Client ID) from local.properties
 val localProperties = Properties().apply {
     load(rootProject.file("local.properties").inputStream())
 }
@@ -25,9 +26,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Load API keys securely from local.properties
         buildConfigField("String", "API_KEY", "\"${localProperties.getProperty("OPENAI_API_KEY")}\"")
         buildConfigField("String", "WEB_CLIENT_ID", "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID")}\"")
-
         manifestPlaceholders["WEB_CLIENT_ID"] = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID")
     }
 
@@ -39,16 +40,15 @@ android {
                 "proguard-rules.pro"
             )
         }
-        //Newly Added
         debug {
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    buildFeatures {  //NEWLY ADDED
-        viewBinding = true
-        compose = true
-        buildConfig = true
+    buildFeatures {
+        viewBinding = true     // Enables View Binding
+        compose = true         // Enables Jetpack Compose
+        buildConfig = true     // Enables BuildConfig constants
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -66,7 +66,7 @@ android {
 }
 
 dependencies {
-
+    // --- Android Core and UI Libraries ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -78,12 +78,63 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.fragment)
     implementation(libs.material)
-    //implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.gridlayout)
-    implementation(libs.googleid)
-    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.cardview)
+
+    // --- Navigation ---
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+
+    // --- Google Sign-In & Credential Manager ---
+    implementation(libs.androidx.credentials)       //Credential Manager
+    implementation(libs.androidx.credentials.play.services.auth)    // Google Sign-in
+    implementation(libs.play.services.base)
+    implementation(libs.googleid)
+    implementation("com.google.android.gms:play-services-auth:21.3.0") {
+        exclude(group = "some.conflicting.group", module = "conflicting-module")
+    }
+
+    // --- Google & Firebase Integration ---
+    implementation(platform(libs.firebase.bom))  // Firebase Bill of Materials (version manager)
+    implementation(libs.firebase.auth.ktx)       // Firebase Authentication
+    implementation(libs.firebase.firestore.ktx)  // Firestore Database
+    implementation(libs.firebase.functions.ktx)  // Firebase Cloud Functions
+    implementation("com.google.firebase:firebase-database-ktx") // Firebase Realtime Database
+    implementation(libs.firebase.analytics)      // Firebase Analytics
+
+    // --- Room Database (Local SQLite) ---
+    implementation(libs.androidx.room.runtime)
+    kapt("androidx.room:room-compiler:2.7.0")
+
+    // --- Lifecycle Components ---
+    implementation(libs.androidx.lifecycle.runtime.ktx.v270)
+
+    // --- Graphs and Charts ---
+    implementation(libs.mpandroidchart)     // Line/Bar chart
+    implementation(libs.eazegraph)          // Pie chart
+    implementation(libs.library)            //Custom chart library
+    implementation(libs.jjoe64.graphview) {
+        exclude(group = "com.android.support")
+    }
+    implementation(libs.hellocharts.library) {
+        exclude(group = "com.android.support")
+    }
+
+    // --- ChatGPT / API Integration ---
+    implementation(libs.retrofit2.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.gson)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp)
+    implementation (libs.flexbox)     // flexbox layout
+
+    // --- Image Loading ---
+    implementation(libs.glide)
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    // --- Testing Dependencies ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -93,84 +144,11 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
-    implementation(libs.play.services.base)
-    //implementation(libs.play.services.auth)
-    //implementation(libs.play.services.auth.v2070)
-    //implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials) //Credential Manager
-    implementation(libs.androidx.credentials.play.services.auth) // Google Sign-in
+    //implementation(platform(libs.firebase.bom.v3280))
+    //implementation(libs.google.firebase.analytics)
+    //implementation(libs.firebase.auth)
+    //implementation(libs.firebase.database.ktx)
 
-    implementation(platform(libs.firebase.bom))
-    implementation(platform(libs.firebase.bom.v3280))
-    //implementation("com.google.firebase:firebase-auth-ktx:23.2.0") // Firebase Authentication
-    //implementation("com.google.firebase:firebase-analytics-ktx")
-    //implementation("com.google.firebase:firebase-auth-ktx")
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.google.firebase.analytics)
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.auth)
-
-    implementation(libs.androidx.appcompat) // Make sure this is compatible with other androidx libraries
-    implementation(libs.androidx.constraintlayout) // Check for compatibility
-    //implementation(libs.material.v1100) // (5) Check for compatibility
-
-    //implementation(libs.jjoe64.graphview)   //Line graph //duplicate problem
-    //implementation(libs.hellocharts.library)  //Pie chart //duplicate problem
-
-    implementation(libs.androidx.cardview)  //Card View
-    //implementation(libs.hellocharts.android) //implementation("com.github.lecho:hellocharts-android:v1.5.8")
-    implementation(libs.mpandroidchart) //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation(libs.eazegraph)          //Pie chart
-    implementation(libs.library)
-
-    //ChatGPT API
-    implementation(libs.retrofit2.retrofit)             //implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation(libs.converter.gson)                 //implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation(libs.gson)                           //implementation("com.google.code.gson:gson:2.10.1")
-    implementation(libs.kotlinx.coroutines.android)     //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation(libs.firebase.functions.ktx)         //implementation("com.google.firebase:firebase-functions-ktx")
-
-    implementation(libs.okhttp)    //implementation("com.squareup.okhttp3:okhttp:4.11.0")
-
-    implementation (libs.flexbox)     //implementation ("com.google.android.flexbox:flexbox:3.0.0")    //flexbox
-
-
-    // Room for SQLite database
-    implementation(libs.androidx.room.runtime)
-    kapt("androidx.room:room-compiler:2.7.0")
-
-    // Lifecycle components
-    implementation(libs.androidx.lifecycle.runtime.ktx.v270)
-
-
-    //for retrieve exercise list
-    implementation(libs.glide)  //implementation("com.github.bumptech.glide:glide:4.16.0")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
-
-
-    implementation(libs.jjoe64.graphview) {
-        exclude(group = "com.android.support", module = "support-compat")
-        exclude(group = "com.android.support", module = "support-v4")
-        exclude(group = "com.android.support", module = "support-core-utils")
-        exclude(group = "com.android.support", module = "support-fragment")
-        exclude(group = "com.android.support", module = "support-annotations")
-        // Add other exclusions as needed based on the error messages
-    }
-
-    implementation(libs.hellocharts.library) {
-        exclude(group = "com.android.support", module = "support-compat")
-        exclude(group = "com.android.support", module = "support-v4")
-        exclude(group = "com.android.support", module = "support-core-utils")
-        exclude(group = "com.android.support", module = "support-fragment")
-        exclude(group = "com.android.support", module = "support-annotations")
-        // Add other exclusions as needed
-    }
-
-    //Debug Implementation
-
-    implementation("com.google.android.gms:play-services-auth:21.3.0") {
-        exclude(group = "some.conflicting.group", module = "conflicting-module")
-    }
 }
 
 configurations.all {
