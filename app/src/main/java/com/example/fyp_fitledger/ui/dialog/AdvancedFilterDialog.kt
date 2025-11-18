@@ -9,13 +9,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import com.example.fyp_fitledger.R
-import com.example.fyp_fitledger.data.repo.ExerciseSummary
+import com.example.fyp_fitledger.data.model.Exercise
 import java.util.Locale
 
 class AdvancedFilterDialog(
     context: Context,
-    private val allExercises: List<ExerciseSummary>,
-    private val onFilterApplied: (List<ExerciseSummary>, Set<String>, Set<String>, Boolean) -> Unit, // ← updated
+    private val allExercises: List<Exercise>,
+    private val onFilterApplied: (List<Exercise>, Set<String>, Set<String>, Boolean) -> Unit, // ← updated
     private val previouslySelectedMuscles: Set<String> = emptySet(),
     private val previouslySelectedEquipments: Set<String> = emptySet(),
     private val previouslySelectedCardio: Boolean = false
@@ -133,7 +133,7 @@ class AdvancedFilterDialog(
     private fun applyFilters() {
         val filtered = allExercises.filter { exercise ->
             val exerciseCategoryLower = exercise.category.lowercase(Locale.ROOT)
-            val exerciseEquipmentLower = exercise.equipment?.lowercase(Locale.ROOT) ?: ""
+            val exerciseEquipmentLower = exercise.equipmentUsed?.lowercase(Locale.ROOT) ?: ""
 
             Log.d("AdvanceFilter", "exerciseCategoryLower: $exerciseCategoryLower  exerciseEquipmentLower: $exerciseEquipmentLower")
 

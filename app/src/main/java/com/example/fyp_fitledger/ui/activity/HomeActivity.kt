@@ -1,12 +1,10 @@
 package com.example.fyp_fitledger.ui.activity
 
 import android.app.DatePickerDialog
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.Gravity
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -17,7 +15,7 @@ import androidx.core.content.ContextCompat
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.ui.component.CircularPercentageRingView
 import com.example.fyp_fitledger.ui.component.NavBarControl
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.github.mikephil.charting.animation.Easing
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -31,6 +29,10 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 import androidx.core.graphics.toColorInt
+import com.example.fyp_fitledger.data.local.dao.MealDao
+import com.example.fyp_fitledger.data.local.dao.MealDaoImpl
+import com.example.fyp_fitledger.data.local.dao.WorkoutDao
+import com.example.fyp_fitledger.data.local.dao.WorkoutDaoImpl
 
 class HomeActivity : AppCompatActivity() {
 
@@ -52,7 +54,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var userID: String
 
     private lateinit var dbHelper: DatabaseHelper
-    private lateinit var database: SQLiteDatabase
+    private lateinit var workoutDao: WorkoutDao
+    private lateinit var mealDao: MealDao
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +78,8 @@ class HomeActivity : AppCompatActivity() {
         //userID = userViewModel.userID ?: ""
 
         dbHelper = DatabaseHelper(this)
-        database = dbHelper.writableDatabase
+        workoutDao = WorkoutDaoImpl(dbHelper)
+        mealDao = MealDaoImpl(dbHelper)
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         NavBarControl.setupBottomNavigation(this, bottomNav)
@@ -146,50 +151,31 @@ class HomeActivity : AppCompatActivity() {
 
 
     private fun loadWorkoutExercises(date: String) {
-        val db = dbHelper.readableDatabase
-
         val workoutContainer = findViewById<LinearLayout>(R.id.workoutContainer)
         workoutContainer.removeAllViews() // Clear previous views
 
-        val query = """
-            SELECT DISTINCT e.Name
-            FROM ExerciseSet es
-            JOIN WorkoutExercise we ON es.WorkoutExercise_ID = we.WorkoutExercise_ID
-            JOIN Exercise e ON we.Exercise_ID = e.Exercise_ID
-            JOIN WorkoutLog wl ON we.Log_ID = wl.Log_ID
-            WHERE wl.User_ID = ? AND wl.Date = ?
-        """
+        val exerciseNames = workoutDao.getExerciseNamesByDate(userID, date)
 
-        val cursor = db.rawQuery(query, arrayOf(userID, date))
-
-        if (cursor.moveToFirst()) {
-            do {
-                val exerciseName = cursor.getString(cursor.getColumnIndexOrThrow("Name"))
-
+        if (exerciseNames.isNotEmpty()) {
+            exerciseNames.forEach { name ->
                 val exerciseTextView = TextView(this).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply {
-                        setMargins(0, 15, 0, 15) // Space between exercises
-                    }
-                    text = exerciseName
+                    ).apply { setMargins(0, 15, 0, 15) }
+                    text = name
                     textSize = 14f
                     setTextColor(ContextCompat.getColor(context, R.color.black))
                     setPadding(20, 10, 20, 10)
                 }
-
                 workoutContainer.addView(exerciseTextView)
-            } while (cursor.moveToNext())
+            }
         } else {
-            // If no exercises, show 'No record found'
             val noRecordTextView = TextView(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0,50,0,50)
-                }
+                ).apply { setMargins(0, 50, 0, 50) }
                 text = "No record found"
                 textSize = 16f
                 setTextColor(ContextCompat.getColor(context, R.color.white))
@@ -197,44 +183,22 @@ class HomeActivity : AppCompatActivity() {
                 setPadding(20, 10, 20, 10)
                 gravity = Gravity.CENTER
             }
-
             workoutContainer.addView(noRecordTextView)
         }
-
-        cursor.close()
     }
 
     private fun loadMacronutrientDistribution(date: String) {
-        val db = dbHelper.readableDatabase
-
-        val query = """
-            SELECT f.Protein, f.Carbohydrates, f.Fat, mlf.Quantity
-            FROM MealLog ml
-            JOIN MealLogFood mlf ON ml.Log_ID = mlf.Log_ID
-            JOIN Food f ON f.Food_Name = mlf.Food
-            WHERE ml.Date = ? AND ml.User_ID = ?
-        """
-
-        val cursor = db.rawQuery(query, arrayOf(date, userID))
-        Log.d("**HomeActivity", "Date: $date, ID: $userID")
+        val macronutrients = mealDao.getMacronutrientsByDate(userID, date)
 
         var totalProtein = 0.0
         var totalCarbs = 0.0
         var totalFat = 0.0
 
-        while (cursor.moveToNext()) {
-            val protein = cursor.getDouble(cursor.getColumnIndexOrThrow("Protein"))
-            val carbs = cursor.getDouble(cursor.getColumnIndexOrThrow("Carbohydrates"))
-            val fat = cursor.getDouble(cursor.getColumnIndexOrThrow("Fat"))
-            val quantity = cursor.getDouble(cursor.getColumnIndexOrThrow("Quantity"))
-
-            totalProtein += protein * quantity
-            totalCarbs += carbs * quantity
-            totalFat += fat * quantity
+        macronutrients.forEach { (protein, carbs, fat) ->
+            totalProtein += protein
+            totalCarbs += carbs
+            totalFat += fat
         }
-
-        cursor.close()
-
         // Calculate total for pie chart
         val total = totalProtein + totalCarbs + totalFat
 
@@ -295,43 +259,11 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun loadMealLogCalories(date: String) {
-        val db = dbHelper.readableDatabase
-        var totalCalories = 0.0
-        var calorieRequirement = 2000.0  // Default, will update based on user ID
+        val totalCalories = mealDao.getTotalCaloriesByDate(userID, date)
+        val calorieRequirement = mealDao.getNutrientPlanByUserId(userID)?.calories
 
-        // 1. Get the total calories from MealLog
-        val calorieQuery = """
-            SELECT f.Calories, mf.Quantity
-            FROM MealLog ml
-            JOIN MealLogFood mf ON ml.Log_ID = mf.Log_ID
-            JOIN Food f ON mf.Food = f.Food_Name
-            WHERE ml.User_ID = ? AND ml.Date = ?
-        """.trimIndent()
+        val progressPercent = (totalCalories / calorieRequirement!! * 100).toFloat().coerceIn(0f, 100f)
 
-        val cursor = db.rawQuery(calorieQuery, arrayOf(userID, date))
-        if (cursor.moveToFirst()) {
-            do {
-                val caloriesPerUnit = cursor.getDouble(0)
-                val quantity = cursor.getDouble(1)
-                totalCalories += caloriesPerUnit * quantity
-                Log.d("**CursorCheck", "Quantity: $quantity, Calories: $caloriesPerUnit")
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-
-        // 2. Get the user's calorie requirement
-        val reqCursor = db.rawQuery(
-            "SELECT Calories FROM NutrientRequirement WHERE User_ID = ?",
-            arrayOf(userID)
-        )
-
-        if (reqCursor.moveToFirst()) {
-            calorieRequirement = reqCursor.getDouble(0)
-        }
-        reqCursor.close()
-
-        // 3. Apply to RingView & TextView
-        val progressPercent = (totalCalories / calorieRequirement * 100).toFloat().coerceIn(0f, 100f)
         ringViewCalorie.percentage = progressPercent
         tvCalorie.text = "${totalCalories.roundToInt()} kcal"
     }

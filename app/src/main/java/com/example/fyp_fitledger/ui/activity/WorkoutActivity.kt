@@ -24,7 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel
 import com.example.fyp_fitledger.ui.component.NavBarControl
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +39,8 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
+import com.example.fyp_fitledger.data.local.dao.WorkoutDao
+import com.example.fyp_fitledger.data.local.dao.WorkoutDaoImpl
 
 class WorkoutActivity : AppCompatActivity() {
 
@@ -56,12 +58,14 @@ class WorkoutActivity : AppCompatActivity() {
     private lateinit var paint: Paint
     private lateinit var userViewModel: UserViewModel
 
+    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var workoutDao: WorkoutDao
+
     private val handler = Handler(Looper.getMainLooper())
     private var imageViewIndex = 0
     private val views = listOf("front", "side", "back")
 
     private val addedExerciseNames = mutableListOf<String>()
-
     private val muscleColorMap = mapOf(
         "#00008d".toColorInt() to "Upper Chest",
         "#0000ff".toColorInt() to "Middle Chest",
@@ -82,7 +86,6 @@ class WorkoutActivity : AppCompatActivity() {
         "#FF69B4".toColorInt() to "Erector Spinae",  //lower back
         "#000000".toColorInt() to "Glutes"
     )
-
     val broadMuscleMappings = mapOf(
         // Delts
         "deltoids" to listOf("Front Delts", "Side Delts", "Rear Delts"),
@@ -136,7 +139,6 @@ class WorkoutActivity : AppCompatActivity() {
         "gastrocnemius" to listOf("Calves"),
         "soleus" to listOf("Calves")
     )
-
     private val trainedMusclesByDay: HashMap<String, Int> = hashMapOf()
 
     private lateinit var exerciseResultLauncher: ActivityResultLauncher<Intent>
@@ -151,6 +153,9 @@ class WorkoutActivity : AppCompatActivity() {
 
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         muscleImageView = findViewById(R.id.muscleImageView)
+
+        dbHelper = DatabaseHelper(this)
+        workoutDao = WorkoutDaoImpl(dbHelper)
 
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null)
@@ -195,11 +200,9 @@ class WorkoutActivity : AppCompatActivity() {
     }
 
     private fun retrieveWorkoutData(userId: String) {
-        val dbHelper = DatabaseHelper(this)
-        val db = dbHelper.readableDatabase
-
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val calendar = Calendar.getInstance()
+
         val today = sdf.format(calendar.time)
         calendar.add(Calendar.DATE, -1)
         val yesterday = sdf.format(calendar.time)
@@ -208,41 +211,25 @@ class WorkoutActivity : AppCompatActivity() {
 
         val dateMap = mapOf(today to 0, yesterday to 1, twoDaysAgo to 2)
 
-        for ((date, daysAgo) in dateMap) {
-            val cursor = db.rawQuery("""
-                SELECT e.MuscleGroup 
-                FROM WorkoutLog wl
-                JOIN WorkoutExercise we ON we.Log_ID = wl.Log_ID
-                JOIN Exercise e ON e.Exercise_ID = we.Exercise_ID
-                WHERE wl.Date = ? AND wl.User_ID = ?
-            """.trimIndent(), arrayOf(date, userId))
+        for ((date, dayOffset) in dateMap) {
+            // Retrieve raw muscles from DAO
+            val data = workoutDao.getMusclesTrainedByDate(userId, date)
 
-            while (cursor.moveToNext()) {
-                val rawMuscle = cursor.getString(0)?.lowercase(Locale.getDefault()) ?: continue
-                Log.d("WorkoutRetrieval", "Raw muscle from DB: $rawMuscle")
-
-                // Split by comma, trim, and process each muscle individually
-                val muscleParts = rawMuscle.split(",").map { it.trim() }
+            for (rawMuscle in data.muscles) {
+                val normalized = rawMuscle.lowercase(Locale.getDefault())
+                val muscleParts = normalized.split(",").map { it.trim() }
 
                 for (musclePart in muscleParts) {
-                    Log.d("WorkoutRetrieval", "Processing muscle part: $musclePart")
-
-                    val mappedMuscles = broadMuscleMappings[musclePart]
+                    val mappedList = broadMuscleMappings[musclePart]
                         ?: listOf(musclePart.replaceFirstChar { it.uppercaseChar() })
 
-                    Log.d("WorkoutRetrieval", "Mapped to: $mappedMuscles for date offset: $daysAgo")
-
-                    for (mappedMuscle in mappedMuscles) {
-                        val currentVal = trainedMusclesByDay[mappedMuscle]
-                        trainedMusclesByDay[mappedMuscle] = minOf(currentVal ?: 3, daysAgo)
+                    for (mapped in mappedList) {
+                        val current = trainedMusclesByDay[mapped]
+                        trainedMusclesByDay[mapped] = minOf(current ?: 3, dayOffset)
                     }
                 }
             }
-
-            cursor.close()
         }
-
-        db.close()
     }
 
     private fun highlightMuscles() {
@@ -250,9 +237,7 @@ class WorkoutActivity : AppCompatActivity() {
             Log.e("WorkoutActivity", "originalBitmap and maskBitmap size mismatch")
             return
         }
-
         val combinedBitmap = createBitmap(originalBitmap.width, originalBitmap.height)
-
         val alphaByDay = mapOf(
             0 to 255,
             1 to 150,
@@ -355,55 +340,35 @@ class WorkoutActivity : AppCompatActivity() {
     }
 
     private fun loadTodayWorkoutExercises(userId: String) {
-        val dbHelper = DatabaseHelper(this)
-        val db = dbHelper.readableDatabase
-
         val container = findViewById<LinearLayout>(R.id.workoutExerciseContainer)
         addedExerciseNames.clear()
         container.removeAllViews()
 
-        val sdf = SimpleDateFormat("EEEE", Locale.getDefault()) // returns "Monday", "Tuesday", etc.
+        val sdf = SimpleDateFormat("EEEE", Locale.getDefault())
         val currentDay = sdf.format(Calendar.getInstance().time)
 
-        val cursor = db.rawQuery("""
-            SELECT wpe.ExerciseName 
-            FROM WorkoutPlan wp
-            JOIN WorkoutPlanDay wpd ON wp.Plan_ID = wpd.Plan_ID
-            JOIN WorkoutPlanExercise wpe ON wpd.PlanDay_ID = wpe.PlanDay_ID
-            WHERE wpd.DayName = ? AND wp.User_ID = ?
-        """.trimIndent(), arrayOf(currentDay, userId))
+        // DAO retrieves list of names
+        val exerciseList = workoutDao.getTodayExercisePlanName(userId, currentDay)
 
-        if (cursor.moveToFirst()) {
-            do {
-                val exerciseName = cursor.getString(0)
-                addedExerciseNames.add(exerciseName)
+        for (exerciseName in exerciseList) {
+            addedExerciseNames.add(exerciseName)
 
-                val textView = TextView(this).apply {
-                    text = exerciseName
-                    textSize = 12f
-                    setTextColor(ContextCompat.getColor(context, R.color.white))
-                    setPadding(20, 12, 40, 12)
-                    background = ContextCompat.getDrawable(context, R.drawable.round_corner_background)
-                    maxWidth = 520
+            val tv = TextView(this).apply {
+                text = exerciseName
+                textSize = 12f
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+                setPadding(20, 12, 40, 12)
+                background = ContextCompat.getDrawable(context, R.drawable.round_corner_background)
+                maxWidth = 520
 
-                    // Create LayoutParams for the TextView
-                    val layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, //width
-                        LinearLayout.LayoutParams.WRAP_CONTENT  //height
-                    )
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 0, 0, 40) }
+            }
 
-                    layoutParams.setMargins(0, 0, 0, 40)
-
-                    // Apply the LayoutParams to the TextView
-                    this.layoutParams = layoutParams
-                }
-
-                container.addView(textView)
-            } while (cursor.moveToNext())
+            container.addView(tv)
         }
-
-        cursor.close()
-        db.close()
 
         updateContainerBias()
     }
@@ -465,7 +430,6 @@ class WorkoutActivity : AppCompatActivity() {
         }
     }
 
-
     private fun isColorSimilar(color1: Int, color2: Int, threshold: Int = 35): Boolean {
         val r1 = Color.red(color1)
         val g1 = Color.green(color1)
@@ -478,7 +442,6 @@ class WorkoutActivity : AppCompatActivity() {
         val distance = sqrt(((r1 - r2).toDouble().pow(2.0)) + ((g1 - g2).toDouble().pow(2.0)) + ((b1 - b2).toDouble().pow(2.0)))
         return distance < threshold
     }
-
 
     private var doubleBackToExitPressedOnce = false
 

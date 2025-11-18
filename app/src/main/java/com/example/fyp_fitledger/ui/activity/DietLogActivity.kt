@@ -2,15 +2,12 @@ package com.example.fyp_fitledger.ui.activity
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -40,7 +37,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.fyp_fitledger.BuildConfig
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.data.model.FoodPortionValue
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,14 +57,28 @@ import java.io.IOException
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import androidx.core.graphics.drawable.toDrawable
+import com.example.fyp_fitledger.data.local.dao.FoodDao
+import com.example.fyp_fitledger.data.local.dao.FoodDaoImpl
+import com.example.fyp_fitledger.data.local.dao.MealDao
+import com.example.fyp_fitledger.data.local.dao.MealDaoImpl
+import com.example.fyp_fitledger.data.model.MealLogFoods
+import com.example.fyp_fitledger.data.model.MealLogs
+import com.example.fyp_fitledger.data.repo.FirebaseRepository
+import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 class DietLogActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
-    private lateinit var database: SQLiteDatabase
+    private lateinit var mealDao: MealDao
+    private lateinit var foodDao: FoodDao
 
     private lateinit var userId: String
     private val currentDate: String = LocalDate.now().toString()
+    private val currentTime = ((LocalTime.now()).format(DateTimeFormatter.ofPattern("HH:mm:ss"))).toString()
 
     private lateinit var ivFood: ImageView
     private lateinit var btnAddFood: Button
@@ -81,8 +92,9 @@ class DietLogActivity : AppCompatActivity() {
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
 
-
     private var progressDialog: AlertDialog? = null // Loading Dialog
+
+    private lateinit var FirebaseRepo: FirebaseRepository
 
     companion object {
         private const val CAMERA_PERMISSION_CODE = 100
@@ -110,7 +122,10 @@ class DietLogActivity : AppCompatActivity() {
         setContentView(R.layout.activity_diet_log)
 
         dbHelper = DatabaseHelper(this)
-        database = dbHelper.writableDatabase
+        mealDao = MealDaoImpl(dbHelper)
+        foodDao = FoodDaoImpl(dbHelper)
+
+        FirebaseRepo = FirebaseRepository()
 
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null)
@@ -134,7 +149,7 @@ class DietLogActivity : AppCompatActivity() {
         if (takePicture == true) {
             Log.d("--DietLogActivity", "takePicture is $takePicture")
             //checkCameraPermissionAndOpenCamera()      //only camera snap image
-            launchCameraOrGalleryChooser()      //cameera or chooose from gallery
+            launchCameraOrGalleryChooser()      //camera or chooose from gallery
         } else {
             Log.d("--DietLogActivity", "takePicture is $takePicture")
             ivFood.visibility = View.GONE
@@ -261,9 +276,7 @@ class DietLogActivity : AppCompatActivity() {
                 if (resultCode == RESULT_OK) {
                     val selectedFood = data?.getStringExtra("selectedFoodName")
                     selectedFood?.let {
-                        // Add to log or update UI
                         Log.d("DietLog", "Selected food: $it")
-                        // Example: addSelectedFoodToLog(it)
                     }
                 }
             }
@@ -415,7 +428,7 @@ class DietLogActivity : AppCompatActivity() {
                 val nameRaw: String = split[0].trim()
                 val correctedName = matchFoodName(
                     nameRaw,
-                    dbHelper.getColumnData("Food", "Food_Name").filterNotNull()
+                    foodDao.getAllFoodName()
                 )
                 val name = correctedName ?: nameRaw
 
@@ -483,11 +496,9 @@ class DietLogActivity : AppCompatActivity() {
         val tvCalorie = itemView.findViewById<TextView>(R.id.calorie)
         val etQuantity = itemView.findViewById<EditText>(R.id.quantityPortion)
 
-        val dbHelper = DatabaseHelper(this)
-
         lifecycleScope.launch {
             val food = withContext(Dispatchers.IO) {
-                dbHelper.getFoodByName(foodName) // This should query the SQLite database for the food
+                foodDao.getFoodByName(foodName)
             }
 
             if (food == null) {
@@ -498,7 +509,7 @@ class DietLogActivity : AppCompatActivity() {
             tvFoodName.text = food.Food_Name
 
             val portions = withContext(Dispatchers.IO) {
-                dbHelper.getPortionsByFoodId(food.Food_ID) // This should query the SQLite database for portions
+                foodDao.getPortionsByFoodId(food.Food_ID)
             }
 
             val spinnerOptions = mutableListOf("100 g")
@@ -564,15 +575,13 @@ class DietLogActivity : AppCompatActivity() {
     }
 
     private fun addFoodToDietContainer(foodItems: List<FoodPortionValue>) {
-        val dbHelper = DatabaseHelper(this)
-
         lifecycleScope.launch {
             val dietContainer = findViewById<LinearLayout>(R.id.dietContainer)
             dietContainer.removeAllViews()
 
             for (portionValue in foodItems) {
                 val food = withContext(Dispatchers.IO) {
-                    dbHelper.getFoodByName(portionValue.name)
+                    foodDao.getFoodByName(portionValue.name)
                 }
 
                 if (food != null) {
@@ -587,7 +596,7 @@ class DietLogActivity : AppCompatActivity() {
                     tvFoodName.text = food.Food_Name
 
                     val portions = withContext(Dispatchers.IO) {
-                        dbHelper.getPortionsByFoodId(food.Food_ID)
+                        foodDao.getPortionsByFoodId(food.Food_ID)
                     }
 
                     val spinnerOptions = mutableListOf("100 g")
@@ -669,6 +678,7 @@ class DietLogActivity : AppCompatActivity() {
 
         val foodEntries =
             mutableListOf<Triple<String, Double, Double>>() // (foodName, unitGram, quantity)
+        val foodList = mutableListOf<FoodPortionValue>()
 
         for (i in 0 until dietContainer.childCount) {
             val itemView = dietContainer.getChildAt(i)
@@ -678,6 +688,7 @@ class DietLogActivity : AppCompatActivity() {
             val selectedPortion = spinner.selectedItem.toString()
 
             val quantity = quantityStr.toDoubleOrNull() ?: 0.0
+            if (quantity <= 0) continue
 
             // Get gram value from spinner selection
             val unitGram = if (selectedPortion.contains("100 g")) {
@@ -689,6 +700,9 @@ class DietLogActivity : AppCompatActivity() {
             }
 
             foodEntries.add(Triple(foodName, unitGram, quantity))
+
+            val normalizedQuantity = (quantity * unitGram) / 100.0
+            foodList.add(FoodPortionValue(foodName, normalizedQuantity))
         }
 
         if (foodEntries.isEmpty()) {
@@ -696,29 +710,32 @@ class DietLogActivity : AppCompatActivity() {
             return
         }
 
-        // Insert into MealLog
-        val contentMealLog = ContentValues().apply {
-            put("User_ID", userId)
-            put("Date", currentDate)
-            put("Notes", "") // Optional
-        }
-        val logId = database.insert("MealLog", null, contentMealLog)
+        val mealLogId = mealDao.insertMealLog(MealLogs(0, userId, currentDate, currentTime, "", 0))
+        val mealLogFoodIds = mutableListOf<Long>()
 
         // Insert each food into MealLogFood
         for ((foodName, unitGram, quantity) in foodEntries) {
             val quantityPer100g = (quantity * unitGram) / 100.0  // Normalize to per 100g
 
-            val contentFood = ContentValues().apply {
-                put("Log_ID", logId)
-                put("Food", foodName)
-                put("Quantity", quantityPer100g)
-            }
-            database.insert("MealLogFood", null, contentFood)
+            val mealLogFoodId = mealDao.insertMealLogFood(
+                MealLogFoods(
+                    0,
+                    mealLogId,
+                    foodName,
+                    quantityPer100g,
+                    0
+                )
+            )
+            mealLogFoodIds.add(mealLogFoodId)
+
             Log.d(
                 "DIET_LOG",
-                "Inserted to log $logId for user $userId food:$foodName, quantity:$quantityPer100g"
+                "Inserted to log $mealLogId for user $userId food:$foodName, quantity:$quantityPer100g"
             )
         }
+
+        //call function to save the food into firebase
+        saveToFirebase(foodList, mealLogId, mealLogFoodIds)
 
         Toast.makeText(this, "Diet log saved!", Toast.LENGTH_SHORT).show()
         val intent = Intent(this, DietActivity::class.java)
@@ -747,6 +764,31 @@ class DietLogActivity : AppCompatActivity() {
 
     private fun dismissLoadingDialog() {
         progressDialog?.dismiss()
+    }
+
+    private fun saveToFirebase(foodList: List<FoodPortionValue>, mealLogId: Long, mealLogFoodIds: List<Long>) {
+        if (foodList.isEmpty()) {
+            Toast.makeText(this, "No food entries to save!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+
+        FirebaseRepo.saveMealLog(
+            date = currentDate,
+            time = currentTime,
+            notes = "",
+            foods = foodList
+        ) { success, error ->
+            if (success) {
+                mealDao.markMealLogSynced(mealLogId)
+                mealLogFoodIds.forEach { mealDao.markMealLogFoodSynced(it) }
+
+                Log.d("DietLogActivity", "Diet log saved to firebase!")
+            } else {
+                Log.e("DietLogActivity", "Failed to save diet log to firebase: $error")
+            }
+        }
     }
 
 }

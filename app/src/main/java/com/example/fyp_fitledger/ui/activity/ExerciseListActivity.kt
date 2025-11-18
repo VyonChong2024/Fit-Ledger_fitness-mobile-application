@@ -17,21 +17,24 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.bumptech.glide.Glide
 import com.example.fyp_fitledger.R
-import com.example.fyp_fitledger.data.repo.ExerciseRepository
-import com.example.fyp_fitledger.data.repo.ExerciseSummary
 import com.example.fyp_fitledger.ui.dialog.AdvancedFilterDialog
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
+import com.example.fyp_fitledger.data.local.dao.ExerciseDao
+import com.example.fyp_fitledger.data.local.dao.ExerciseDaoImpl
+import com.example.fyp_fitledger.data.model.Exercise
 
 class ExerciseListActivity : AppCompatActivity() {
 
-    private lateinit var dbHelper: DatabaseHelper
     private lateinit var exerciseContainer: LinearLayout
     private lateinit var searchEditText: EditText
     private lateinit var filterButton: ImageButton
     private lateinit var filterOption: LinearLayout
 
-    private var allExercises: List<ExerciseSummary> = listOf()
-    private var filteredExercises: List<ExerciseSummary> = listOf()
+    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var exerciseDao: ExerciseDao
+
+    private var allExercises: List<Exercise> = listOf()
+    private var filteredExercises: List<Exercise> = listOf()
 
     private var selectedCategories = mutableSetOf<String>()
     private var currentSearchQuery: String = ""
@@ -49,6 +52,8 @@ class ExerciseListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_exercise_list)
 
         dbHelper = DatabaseHelper(this)
+        exerciseDao = ExerciseDaoImpl(dbHelper)
+
         exerciseContainer = findViewById(R.id.exerciseContainer)
         searchEditText = findViewById(R.id.searchEditText)
         filterButton = findViewById(R.id.filterButton)
@@ -86,13 +91,12 @@ class ExerciseListActivity : AppCompatActivity() {
     }
 
     private fun loadExercises() {
-        val exerciseRepository = ExerciseRepository(dbHelper)
-        allExercises = exerciseRepository.getExerciseSummaries()
+        allExercises = exerciseDao.getAllExercises()
         filteredExercises = allExercises
         displayExercises(filteredExercises)
     }
 
-    private fun displayExercises(exercises: List<ExerciseSummary>) {
+    private fun displayExercises(exercises: List<Exercise>) {
         exerciseContainer.removeAllViews()
         for (exercise in exercises) {
             val itemView = layoutInflater.inflate(R.layout.exercise_item, null)

@@ -11,14 +11,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.example.fyp_fitledger.R
-import com.example.fyp_fitledger.data.repo.ExerciseDetailData
-import com.example.fyp_fitledger.data.repo.ExerciseRepository
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
+import com.example.fyp_fitledger.data.local.dao.ExerciseDao
+import com.example.fyp_fitledger.data.local.dao.ExerciseDaoImpl
+import com.example.fyp_fitledger.data.model.Exercise
 
 class ExerciseDetailActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var exerciseDao: ExerciseDao
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +29,8 @@ class ExerciseDetailActivity : AppCompatActivity() {
 
         // Initialize DB and ViewModel
         dbHelper = DatabaseHelper(this)
+        exerciseDao = ExerciseDaoImpl(dbHelper)
+
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         val exerciseName = intent.getStringExtra("exercise_name")
@@ -37,14 +41,18 @@ class ExerciseDetailActivity : AppCompatActivity() {
         }
 
         // Fetch from DB
-        val exerciseRepository = ExerciseRepository(dbHelper)
-        val exercise: ExerciseDetailData = exerciseRepository.getExerciseByName(exerciseName)
+        val exercise: Exercise? = exerciseDao.getExerciseByName(exerciseName)
+        if (exercise == null) {
+            Toast.makeText(this, "Exercise not found", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         // Populate UI
         findViewById<TextView>(R.id.tvWorkoutName).text = exercise.name
         findViewById<TextView>(R.id.tvCategory).text = exercise.category
-        findViewById<TextView>(R.id.tvMuscleTrained).text = exercise.muscles
-        findViewById<TextView>(R.id.tvEquipment).text = exercise.equipment
+        findViewById<TextView>(R.id.tvMuscleTrained).text = exercise.muscleGroup
+        findViewById<TextView>(R.id.tvEquipment).text = exercise.equipmentUsed
 
 
         val formattedInstruction = exercise.instruction.replace("\\n", "\n")

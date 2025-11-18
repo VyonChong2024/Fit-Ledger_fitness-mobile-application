@@ -1,8 +1,5 @@
 package com.example.fyp_fitledger.data.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
 data class FoodJson(
     val fdcId: Int,
     val description: String,
@@ -34,13 +31,7 @@ data class MeasureUnit(
     val name: String?
 )
 
-@Entity(tableName = "FoodPortion")
-data class FoodPortion(
-    @PrimaryKey(autoGenerate = true) val FoodPortion_ID: Int = 0,
-    val Food_ID: Int,
-    val Unit: String,
-    val UnitValue: String
-)
+
 
 data class RootJson(
     val FoundationFoods: List<FoodJson>

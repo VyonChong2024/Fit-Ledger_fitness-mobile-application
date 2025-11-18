@@ -1,23 +1,23 @@
 package com.example.fyp_fitledger.data.repo
 
 import android.util.Log
+import com.example.fyp_fitledger.data.model.BodyFatEntry
+import com.example.fyp_fitledger.data.model.FoodPortionValue
+import com.example.fyp_fitledger.data.model.MealLog
+import com.example.fyp_fitledger.data.model.UserProfile
+import com.example.fyp_fitledger.data.model.WeightEntry
+import com.example.fyp_fitledger.data.model.WorkoutLog
 import com.example.fyp_fitledger.data.model.WorkoutPlanDays
+import com.example.fyp_fitledger.data.model.WorkoutExercise
+import com.example.fyp_fitledger.data.model.WorkoutSet
+import com.example.fyp_fitledger.data.model.Exercises
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-
-data class WorkoutExercise(
-    val name: String = "",
-    val sets: Int = 0,
-    val reps: Int = 0
-)
-
-data class WorkoutPlanDays(
-    val day: String = "",
-    val workoutName: String = "",
-    val exercises: List<WorkoutExercise> = emptyList()
-)
 
 class FirebaseRepository {
     private val auth = FirebaseAuth.getInstance()
@@ -55,20 +55,6 @@ class FirebaseRepository {
             "dietPlan" to (dietPlan ?: "")
         )
 
-        val workoutData = workoutPlan.map { day ->
-            mapOf(
-                "day" to day.day,
-                "workoutName" to day.workoutName,
-                "exercises" to day.exercises.map { ex ->
-                    mapOf(
-                        "name" to ex.name,
-                        "sets" to ex.sets,
-                        "reps" to ex.reps
-                    )
-                }
-            )
-        }
-
         val nutrientData = mapOf(
             "Calories" to nutrientPlan[0],
             "Protein" to nutrientPlan[1],
@@ -87,11 +73,34 @@ class FirebaseRepository {
             "VitaminB12" to nutrientPlan[14]
         )
 
+        val planId = userRef.collection("workoutPlans").document().id
+        val planRef = userRef.collection("workoutPlans").document(planId)
         // 🔄 Save data as subcollections atomically
         db.runBatch { batch ->
             batch.set(userRef.collection("profile").document("info"), profileData)
-            batch.set(userRef.collection("workoutPlan").document("days"), mapOf("plan" to workoutData))
-            batch.set(userRef.collection("nutrientPlan").document("values"), nutrientData)
+            batch.set(userRef.collection("nutrientRequirement").document("current"), nutrientData)
+            batch.set(planRef, mapOf(
+                "planName" to "Default Plan",
+                "createdDate" to System.currentTimeMillis(),
+                "lastUpdated" to System.currentTimeMillis()
+            ))
+            // Save workout plan days
+            workoutPlan.forEach { day ->
+                val dayRef = planRef.collection("days").document(day.day)
+                val exercisesData = day.exercises.map { ex ->
+                    mapOf(
+                        "name" to ex.name,
+                        "sets" to ex.sets,
+                        "reps" to ex.reps
+                    )
+                }
+                val dayData = mapOf(
+                    "dayName" to day.day,
+                    "workoutName" to day.workoutName,
+                    "exercises" to exercisesData
+                )
+                batch.set(dayRef, dayData)
+            }
         }.addOnSuccessListener {
             Log.d("FirebaseRepo", "✅ All user data saved successfully!")
             onResult(true, null)
@@ -101,52 +110,361 @@ class FirebaseRepository {
         }
     }
 
-    // -----------------------------
-    // 🔹 FETCH USER DATA
-    // -----------------------------
-    fun getUserData(
-        userId: String,
-        onResult: (Boolean, Map<String, Any>?) -> Unit
+    fun saveBodyFatHistory(bodyFatPercent: Double, date: String, onResult: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, "User not signed in")
+        val historyRef = db.collection("users").document(userId)
+            .collection("bodyFatHistory").document()
+
+        val data = mapOf(
+            "bodyFatPercent" to bodyFatPercent,
+            "date" to date
+        )
+
+        historyRef.set(data)
+            .addOnSuccessListener { onResult(true, null) }
+            .addOnFailureListener { e -> onResult(false, e.message) }
+    }
+
+    fun saveWeightHistory(weight: Double, date: String, onResult: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, "User not signed in")
+        val weightRef = db.collection("users").document(userId)
+            .collection("weightHistory").document()
+
+        val data = mapOf(
+            "weight" to weight,
+            "date" to date
+        )
+
+        weightRef.set(data)
+            .addOnSuccessListener { onResult(true, null) }
+            .addOnFailureListener { e -> onResult(false, e.message) }
+    }
+
+    fun saveWorkoutLog(
+        workoutLog: WorkoutLog,
+        onResult: (Boolean, String?) -> Unit
     ) {
-        val userRef = db.collection("users").document(userId)
+        val userId = auth.currentUser?.uid ?: return onResult(false, "User not signed in")
+        val logRef = db.collection("users").document(userId)
+            .collection("workoutLogs").document()
 
-        val userData = mutableMapOf<String, Any>()
+        val logData = mapOf(
+            "date" to workoutLog.date,
+            "startTime" to workoutLog.startTime,
+            "duration" to workoutLog.duration,
+            "notes" to workoutLog.notes,
+            "isSynced" to true
+        )
 
-        // Fetch profile, workout plan, nutrient plan in parallel
-        userRef.collection("profile").document("info").get()
-            .addOnSuccessListener { profileDoc ->
-                if (profileDoc.exists()) {
-                    userData["profile"] = profileDoc.data ?: emptyMap<String, Any>()
+        db.runBatch { batch ->
+            batch.set(logRef, logData)
+
+            workoutLog.exercises.forEach { ex ->
+                val exRef = logRef.collection("exercises").document()
+                batch.set(exRef, mapOf(
+                    "exerciseId" to ex.exerciseId,
+                    "isSynced" to true
+                ))
+
+                ex.sets.forEach { set ->
+                    val setRef = exRef.collection("sets").document()
+                    batch.set(setRef, mapOf(
+                        "setNo" to set.setNo,
+                        "reps" to set.reps,
+                        "weightUsed" to set.weightUsed,
+                        "isSynced" to true
+                    ))
+                }
+            }
+        }.addOnSuccessListener { onResult(true, null) }
+            .addOnFailureListener { e -> onResult(false, e.message) }
+    }
+
+    fun saveMealLog(
+        date: String,
+        time: String,
+        notes: String,
+        foods: List<FoodPortionValue>,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, "User not signed in")
+        val mealRef = db.collection("users").document(userId)
+            .collection("mealLogs").document()
+
+        val mealData = mapOf(
+            "date" to date,
+            "time" to time,
+            "notes" to notes
+        )
+
+        db.runBatch { batch ->
+            batch.set(mealRef, mealData)
+
+            foods.forEach { food ->
+                val foodRef = mealRef.collection("foods").document()
+                val foodData = mapOf(
+                    "food" to food.name,
+                    "quantity" to food.amount
+                )
+                batch.set(foodRef, foodData)
+            }
+        }.addOnSuccessListener { onResult(true, null) }
+            .addOnFailureListener { e -> onResult(false, e.message) }
+    }
+
+    // FETCH USER DATA
+    fun getUserProfile(onResult: (Boolean, UserProfile?, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+        val profileRef = db.collection("users").document(userId)
+            .collection("profile").document("info")
+
+        profileRef.get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val profile = UserProfile(
+                        gender = doc.getString("gender") ?: "",
+                        age = (doc.getLong("age") ?: 0L).toInt(),
+                        height = doc.getDouble("height") ?: 0.0,
+                        weight = doc.getDouble("weight") ?: 0.0,
+                        bodyFatPercent = doc.getDouble("bodyFatPercent") ?: 0.0,
+                        targetBodyFat = doc.getDouble("targetBodyFat") ?: 0.0,
+                        targetWeight = doc.getDouble("targetWeight") ?: 0.0,
+                        dietPlan = doc.getString("dietPlan") ?: ""
+                    )
+                    onResult(true, profile, null)
+                } else {
+                    onResult(false, null, "Profile not found")
+                }
+            }
+            .addOnFailureListener { e -> onResult(false, null, e.message) }
+    }
+
+    fun getWorkoutPlan(
+        onResult: (Boolean, List<WorkoutPlanDays>?, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+
+        val plansRef = db.collection("users").document(userId).collection("workoutPlans")
+
+        plansRef.get()
+            .addOnSuccessListener { plansSnapshot ->
+                if (plansSnapshot.isEmpty) {
+                    onResult(true, emptyList(), null)
+                    return@addOnSuccessListener
                 }
 
-                userRef.collection("workoutPlan").document("days").get()
-                    .addOnSuccessListener { workoutDoc ->
-                        if (workoutDoc.exists()) {
-                            userData["workoutPlan"] = workoutDoc.data ?: emptyMap<String, Any>()
+                val allDays = mutableListOf<WorkoutPlanDays>()
+                val dayTasks = mutableListOf<Task<QuerySnapshot>>()
+
+                // For each workout plan document
+                for (planDoc in plansSnapshot.documents) {
+                    val daysRef = planDoc.reference.collection("days")
+
+                    val dayTask = daysRef.get().addOnSuccessListener { daysSnapshot ->
+                        for (dayDoc in daysSnapshot.documents) {
+
+                            // Extract exercises list from 'exercises' array in Firestore
+                            val exercisesList = (dayDoc["exercises"] as? List<Map<String, Any>>)?.map { ex ->
+                                Exercises(
+                                    name = ex["name"] as? String ?: "",
+                                    sets = (ex["sets"] as? Number)?.toInt() ?: 0,
+                                    reps = (ex["reps"] as? Number)?.toInt() ?: 0
+                                )
+                            } ?: emptyList()
+
+                            // Add to our result list
+                            allDays.add(
+                                WorkoutPlanDays(
+                                    day = dayDoc.getString("dayName") ?: dayDoc.id,
+                                    workoutName = dayDoc.getString("workoutName") ?: "",
+                                    exercises = exercisesList
+                                )
+                            )
                         }
+                    }
 
-                        userRef.collection("nutrientPlan").document("values").get()
-                            .addOnSuccessListener { nutrientDoc ->
-                                if (nutrientDoc.exists()) {
-                                    userData["nutrientPlan"] = nutrientDoc.data ?: emptyMap<String, Any>()
-                                }
+                    dayTasks.add(dayTask)
+                }
 
-                                Log.d("FirebaseRepo", "✅ User data fetched successfully")
-                                onResult(true, userData)
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e("FirebaseRepo", "❌ Failed to fetch nutrientPlan", e)
-                                onResult(false, null)
-                            }
+                // Wait until all plan-day reads are complete
+                Tasks.whenAllSuccess<QuerySnapshot>(dayTasks)
+                    .addOnSuccessListener {
+                        onResult(true, allDays, null)
                     }
                     .addOnFailureListener { e ->
-                        Log.e("FirebaseRepo", "❌ Failed to fetch workoutPlan", e)
-                        onResult(false, null)
+                        onResult(false, null, e.message)
                     }
             }
             .addOnFailureListener { e ->
-                Log.e("FirebaseRepo", "❌ Failed to fetch profile", e)
-                onResult(false, null)
+                onResult(false, null, e.message)
             }
+    }
+
+    fun getMealLogs(onResult: (Boolean, List<MealLog>?, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+        val mealLogsRef = db.collection("users").document(userId).collection("mealLogs")
+
+        mealLogsRef.get()
+            .addOnSuccessListener { mealSnap ->
+                if (mealSnap.isEmpty) {
+                    return@addOnSuccessListener onResult(true, emptyList(), null)
+                }
+
+                val mealLogs = mutableListOf<MealLog>()
+                val tasks = mutableListOf<Task<QuerySnapshot>>()
+
+                for (mealDoc in mealSnap.documents) {
+                    val foodsRef = mealDoc.reference.collection("foods")
+                    tasks.add(foodsRef.get().addOnSuccessListener { foodsSnap ->
+                        val foods = foodsSnap.map {
+                            FoodPortionValue(
+                                name = it.getString("food") ?: "",
+                                amount = it.getDouble("quantity") ?: 0.0
+                            )
+                        }
+
+                        mealLogs.add(
+                            MealLog(
+                                date = mealDoc.getString("date") ?: "",
+                                time = mealDoc.getString("time") ?: "",
+                                notes = mealDoc.getString("notes") ?: "",
+                                foods = foods
+                            )
+                        )
+                    })
+                }
+
+                Tasks.whenAllSuccess<QuerySnapshot>(tasks)
+                    .addOnSuccessListener { onResult(true, mealLogs, null) }
+                    .addOnFailureListener { e -> onResult(false, null, e.message) }
+            }
+            .addOnFailureListener { e -> onResult(false, null, e.message) }
+    }
+
+    fun getWorkoutLogs(onResult: (Boolean, List<WorkoutLog>?, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+        val logsRef = db.collection("users").document(userId).collection("workoutLogs")
+
+        logsRef.get()
+            .addOnSuccessListener { logsSnapshot ->
+                if (logsSnapshot.isEmpty) {
+                    onResult(true, emptyList(), null)
+                    return@addOnSuccessListener
+                }
+
+                val workoutLogs = mutableListOf<WorkoutLog>()
+                val allTasks = mutableListOf<Task<QuerySnapshot>>()
+
+                for (logDoc in logsSnapshot.documents) {
+                    val log = WorkoutLog(
+                        date = logDoc.getString("date") ?: "",
+                        startTime = logDoc.getLong("startTime") ?: 0L,
+                        duration = (logDoc.getLong("duration"))?.toInt() ?: 0,
+                        notes = logDoc.getString("notes") ?: "",
+                        exercises = mutableListOf()
+                    )
+
+                    val exRef = logDoc.reference.collection("exercises")
+                    val exTask = exRef.get().addOnSuccessListener { exSnapshot ->
+                        val exercises = mutableListOf<WorkoutExercise>()
+                        val setTasks = mutableListOf<Task<QuerySnapshot>>()
+
+                        for (exDoc in exSnapshot.documents) {
+                            val exerciseId = (exDoc.getLong("exerciseId") ?: 0L)
+                            val setsRef = exDoc.reference.collection("sets")
+
+                            val setTask = setsRef.get().addOnSuccessListener { setsSnapshot ->
+                                val sets = setsSnapshot.map { setDoc ->
+                                    WorkoutSet(
+                                        setNo = setDoc.getString("setNo") ?: "",
+                                        reps = (setDoc.getLong("reps") ?: 0L).toInt(),
+                                        weightUsed = (setDoc.getDouble("weightUsed") ?: 0.0)
+                                    )
+                                }
+
+                                exercises.add(
+                                    WorkoutExercise(
+                                        exerciseId = exerciseId,
+                                        sets = sets
+                                    )
+                                )
+                            }
+
+                            setTasks.add(setTask)
+                        }
+
+                        Tasks.whenAllSuccess<QuerySnapshot>(setTasks)
+                            .addOnSuccessListener {
+                                (log.exercises as MutableList).addAll(exercises)
+                            }
+                    }
+
+                    allTasks.add(exTask)
+                    workoutLogs.add(log)
+                }
+
+                Tasks.whenAllSuccess<QuerySnapshot>(allTasks)
+                    .addOnSuccessListener { onResult(true, workoutLogs, null) }
+                    .addOnFailureListener { e -> onResult(false, null, e.message) }
+            }
+            .addOnFailureListener { e -> onResult(false, null, e.message) }
+    }
+
+    fun getNutrientRequirement(onResult: (Boolean, Map<String, Float>?, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+        val nutrientRef = db.collection("users").document(userId)
+            .collection("nutrientRequirement").document("current")
+
+        nutrientRef.get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val nutrients = doc.data?.mapValues { (_, value) ->
+                        when (value) {
+                            is Number -> value.toFloat()
+                            else -> 0f
+                        }
+                    } ?: emptyMap()
+                    onResult(true, nutrients, null)
+                } else {
+                    onResult(false, null, "No nutrient data found")
+                }
+            }
+            .addOnFailureListener { e -> onResult(false, null, e.message) }
+    }
+
+    fun getBodyFatHistory(onResult: (Boolean, List<BodyFatEntry>?, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+        val historyRef = db.collection("users").document(userId)
+            .collection("bodyFatHistory")
+
+        historyRef.get()
+            .addOnSuccessListener { snapshot ->
+                val entries = snapshot.map {
+                    BodyFatEntry(
+                        bodyFatPercent = it.getDouble("bodyFatPercent") ?: 0.0,
+                        date = it.getString("date") ?: ""
+                    )
+                }.sortedBy { it.date } // optional sorting
+                onResult(true, entries, null)
+            }
+            .addOnFailureListener { e -> onResult(false, null, e.message) }
+    }
+
+    fun getWeightHistory(onResult: (Boolean, List<WeightEntry>?, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
+        val weightRef = db.collection("users").document(userId)
+            .collection("weightHistory")
+
+        weightRef.get()
+            .addOnSuccessListener { snapshot ->
+                val entries = snapshot.map {
+                    WeightEntry(
+                        weight = it.getDouble("weight") ?: 0.0,
+                        date = it.getString("date") ?: ""
+                    )
+                }.sortedBy { it.date }
+                onResult(true, entries, null)
+            }
+            .addOnFailureListener { e -> onResult(false, null, e.message) }
     }
 }

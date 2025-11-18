@@ -1,9 +1,7 @@
 package com.example.fyp_fitledger.ui.fragment
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,13 +11,20 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.example.fyp_fitledger.data.repo.FirebaseRepository
 import com.example.fyp_fitledger.ui.activity.HomeActivity
 import com.example.fyp_fitledger.R
+import com.example.fyp_fitledger.data.local.dao.MealDao
+import com.example.fyp_fitledger.data.local.dao.MealDaoImpl
+import com.example.fyp_fitledger.data.local.dao.UserDao
+import com.example.fyp_fitledger.data.local.dao.UserDaoImpl
+import com.example.fyp_fitledger.data.local.dao.WorkoutDao
+import com.example.fyp_fitledger.data.local.dao.WorkoutDaoImpl
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel
 import com.example.fyp_fitledger.data.viewmodel.WorkoutPlanViewModel
 import com.example.fyp_fitledger.data.model.Exercises
+import com.example.fyp_fitledger.data.model.User
 import com.example.fyp_fitledger.data.model.WorkoutPlanDays
 import java.time.LocalDate
 
@@ -31,7 +36,9 @@ class FinishSetupFragment : Fragment() {
     private lateinit var workoutPlanViewModel: WorkoutPlanViewModel
 
     private lateinit var dbHelper: DatabaseHelper
-    private lateinit var database: SQLiteDatabase
+    private lateinit var userDao: UserDao
+    private lateinit var mealDao: MealDao
+    private lateinit var workoutDao: WorkoutDao
     private lateinit var firebaseRepo: FirebaseRepository
 
     override fun onCreateView(
@@ -46,9 +53,13 @@ class FinishSetupFragment : Fragment() {
         workoutPlanViewModel = ViewModelProvider(requireActivity()).get(WorkoutPlanViewModel::class.java)
 
         dbHelper = DatabaseHelper(requireContext())
-        database = dbHelper.writableDatabase
         firebaseRepo = FirebaseRepository()
 
+        userDao = UserDaoImpl(dbHelper)
+        mealDao = MealDaoImpl(dbHelper)
+        workoutDao = WorkoutDaoImpl(dbHelper)
+
+        // Retrieve all user information
         val userId = userViewModel.userID
         val gender = userViewModel.gender
         val age = userViewModel.age
@@ -58,60 +69,89 @@ class FinishSetupFragment : Fragment() {
         val targetBodyFat = workoutPlanViewModel.targetBodyFat
         val targetWeight = workoutPlanViewModel.targetWeight
         val dietPlan = workoutPlanViewModel.dietPlan
-
         val workoutPlan = WorkoutPlanFragment.workoutPlan?.let { parseWorkoutPlans(it) } ?: emptyList()
+
+        val today = LocalDate.now().toString()
+
+        // stored the primary key of each data in database table
+        val workoutPlanIds = mutableListOf<Long>()
+        val workoutPlanDayIds = mutableListOf<Long>()
+        val workoutExerciseIds = mutableListOf<Long>()
+        val bodyFatIds = mutableListOf<Long>()
+        val weightIds = mutableListOf<Long>()
+        val nutrientIds = mutableListOf<Long>()
 
         if(userId != null) {
             try {
-                database.beginTransaction()
-                try {
-                    //insert user table data
-                    insertUserData(userId, gender!!, age!!, height!!, weight!!, bodyFatPercent!!, targetBodyFat, targetWeight, dietPlan)
+                //insert user table data
+                userDao.insertUser(User(userId, gender!!, age!!, height!!, weight!!, bodyFatPercent!!, targetBodyFat, targetWeight, dietPlan))
 
-                    //insert workout plan data
-                    if (!workoutPlan.isEmpty()) {
-                        val planId = insertWorkoutPlan(userId, "April Plan")
-                        for (day in workoutPlan) {
-                            val dayId = insertWorkoutPlanDay(planId, day.day, day.workoutName)
-                            for (exercise in day.exercises) {
-                                insertWorkoutPlanExercise(dayId, exercise.name, exercise.sets, exercise.reps)
-                            }
+                //insert workout plan data
+                if (!workoutPlan.isEmpty()) {
+                    val planId = workoutDao.insertWorkoutPlan(userId, today + " Plan", today)
+                    workoutPlanIds.add(planId)
+                    for (day in workoutPlan) {
+                        val dayId = workoutDao.insertWorkoutPlanDay(planId, day.day, day.workoutName)
+                        workoutPlanDayIds.add(dayId)
+                        for (exercise in day.exercises) {
+                            val exerciseId = workoutDao.insertWorkoutPlanExercise(dayId, exercise.name, exercise.sets, exercise.reps)
+                            workoutExerciseIds.add(exerciseId)
                         }
                     }
-
-                    //insert body fat and weight history record
-                    insertBodyFatRecord(userId, bodyFatPercent)
-                    insertWeightRecord(userId, weight)
-
-                    //insert nutrient plan data
-                    val nutrientPlan = DietNutrientPlanFragment.responseString
-                    Log.d("---------------", "nutrient plan: $nutrientPlan")
-                    val nutrientPlanList = parseNutrientPlan(nutrientPlan)
-                    insertNutrientPlan(userId, nutrientPlanList)
-                    firebaseRepo.saveUserSetupData(gender!!, age!!, height!!, weight!!, bodyFatPercent!!,
-                        targetBodyFat, targetWeight, dietPlan, workoutPlan, nutrientPlanList) { success, error ->
-                        if (success) Log.d("MainActivity", "Data saved to Firebase")
-                        else Log.e("MainActivity", "Save failed: $error")
-                    }
-
-                    //Final Data saved, set the user is complete setup
-                    markSetupCompleteForUser(userId)
-
-                    database.setTransactionSuccessful()
-                    btnNext.isEnabled = true
-                    Toast.makeText(requireContext(), "Saving data successful", Toast.LENGTH_SHORT).show()
-                    Log.d("FinishSetupFragment", "Saving data successful")
-                } finally {
-                    database.endTransaction()
-                    Log.d("FinishSetupFragment", "Transaction End")
                 }
-            }
-            catch (e: Exception) {
-                btnNext.isEnabled = false
-                Toast.makeText(requireContext(), "Unexpected error occurs", Toast.LENGTH_SHORT).show()
-                Log.e("FinishSetupFragment", "Error saving data: ${e.message}", e)
-            }
 
+                //insert body fat and weight history record
+                val dbBodyFatId = userDao.updateBodyFatPercent(userId, bodyFatPercent, today)
+                val dbWeightId = userDao.updateWeight(userId, weight, today)
+                bodyFatIds.add(dbBodyFatId)
+                weightIds.add(dbWeightId)
+
+                //insert nutrient plan data
+                val nutrientPlan = DietNutrientPlanFragment.responseString
+                val nutrientPlanList = parseNutrientPlan(nutrientPlan)
+                val nutrientId = mealDao.insertNutrientPlan(userId, nutrientPlanList)
+                nutrientIds.add(nutrientId)
+
+                firebaseRepo.saveUserSetupData(
+                    gender, age, height, weight, bodyFatPercent,
+                    targetBodyFat, targetWeight, dietPlan, workoutPlan, nutrientPlanList) { success, error ->
+                    if (success) {
+                        //Mark data as synced
+                        userDao.markUserSynced(userId)
+                        workoutPlanIds.forEach { workoutDao.markWorkoutPlanSynced(it) }
+                        workoutPlanDayIds.forEach { workoutDao.markWorkoutPlanDaySynced(it) }
+                        workoutExerciseIds.forEach { workoutDao.markWorkoutPlanExerciseSynced(it) }
+                        nutrientIds.forEach { mealDao.markNutrientPlanSynced(it) }
+
+                        Log.d("MainActivity", "Data saved to Firebase")
+
+                        firebaseRepo.saveBodyFatHistory(bodyFatPercent, today ) { success, error ->
+                            if (success) {
+                                bodyFatIds.forEach { userDao.markBodyFatSynced(it) }
+                                Log.d("MainActivity", "Body fat history saved to Firebase")
+                            }
+                            else Log.e("MainActivity", "Save failed: $error")
+                        }
+                        firebaseRepo.saveWeightHistory(weight!!, today) { success, error ->
+                            if (success) {
+                                weightIds.forEach { userDao.markWeightSynced(it) }
+                                Log.d("MainActivity", "Weight history saved to Firebase")
+                            }
+                            else Log.e("MainActivity", "Save failed: $error")
+                        }
+                    }
+                    else Log.e("MainActivity", "Save failed: $error")
+                }
+
+                //Final Data saved, set the user is complete setup
+                markSetupCompleteForUser(userId)
+
+                btnNext.isEnabled = true
+                Toast.makeText(requireContext(), "Saving data successful", Toast.LENGTH_SHORT).show()
+                Log.d("FinishSetupFragment", "Saving data successful")
+            } finally {
+                Log.d("FinishSetupFragment", "Transaction End")
+            }
         } else {
             btnNext.isEnabled = false
             Log.e("FinishSetupFragment", "User ID is null")
@@ -173,90 +213,6 @@ class FinishSetupFragment : Fragment() {
             }
         }
         return valueList.toList() // Convert to immutable List if needed
-    }
-
-    fun insertWorkoutPlan(userId: String, name: String): Long {
-        val values = ContentValues().apply {
-            put("User_ID", userId)
-            put("PlanName", name)
-            put("CreatedDate", LocalDate.now().toString())
-        }
-        return database.insert("WorkoutPlan", null, values)
-    }
-
-    fun insertWorkoutPlanDay(planId: Long, day: String, workoutName: String): Long {
-        val values = ContentValues().apply {
-            put("Plan_ID", planId)
-            put("DayName", day)
-            put("WorkoutName", workoutName)
-        }
-        return database.insert("WorkoutPlanDay", null, values)
-    }
-
-    fun insertWorkoutPlanExercise(planDayId: Long, name: String, sets: Int, reps: Int): Long {
-        val values = ContentValues().apply {
-            put("PlanDay_ID", planDayId)
-            put("ExerciseName", name)
-            put("Sets", sets)
-            put("Reps", reps)
-        }
-        return database.insert("WorkoutPlanExercise", null, values)
-    }
-
-    fun insertUserData(userId: String, gender: String, age: Int, height: Double, weight: Double, bodyFatPercent: Double, targetBodyFat: Double?, targetWeight: Double?, dietPlan: String?): Long {
-
-        val values = ContentValues().apply {
-            put("User_ID", userId)
-            put("Gender", gender)
-            put("Age", age)
-            put("Height", height)
-            put("Weight", weight)
-            put("BodyFatPercent", bodyFatPercent)
-            put("TargetBodyFat", if (targetBodyFat == null) bodyFatPercent else targetBodyFat)  //used current body fat if target no set
-            put("TargetWeight", if (targetWeight == null) weight else targetWeight) //used current weight if target no set
-            if (dietPlan != null) put("DietPlan", dietPlan)
-        }
-        return database.insert("User", null, values)
-    }
-
-    fun insertBodyFatRecord(userId: String, bodyFatPercent: Double): Long {
-        val values = ContentValues().apply {
-            put("User_ID", userId)
-            put("BodyFatPercent", bodyFatPercent)
-            put("Date", LocalDate.now().toString())
-        }
-        return database.insert("BodyFatHistory", null, values)
-    }
-
-    fun insertWeightRecord(userId: String, weight: Double): Long {
-        val values = ContentValues().apply {
-            put("User_ID", userId)
-            put("Weight", weight)
-            put("Date", LocalDate.now().toString())
-        }
-        return database.insert("WeightHistory", null, values)
-    }
-
-    fun insertNutrientPlan(userId: String, nutrientValue: List<Float>): Long {
-        val values = ContentValues().apply {
-            put("User_ID", userId)
-            put("Calories", nutrientValue[0])
-            put("Protein", nutrientValue[1])
-            put("Carbohydrates", nutrientValue[2])
-            put("Fat", nutrientValue[3])
-            put("Iron", nutrientValue[4])
-            put("Calcium", nutrientValue[5])
-            put("Potassium", nutrientValue[6])
-            put("Magnesium", nutrientValue[7])
-            put("Zinc", nutrientValue[8])
-            put("Sodium", nutrientValue[9])
-            put("VitaminD", nutrientValue[10])
-            put("VitaminA", nutrientValue[11])
-            put("VitaminC", nutrientValue[12])
-            put("VitaminK", nutrientValue[13])
-            put("VitaminB12", nutrientValue[14])
-        }
-        return database.insert("NutrientPlan", null, values)
     }
 
     fun markSetupCompleteForUser(uid: String) {

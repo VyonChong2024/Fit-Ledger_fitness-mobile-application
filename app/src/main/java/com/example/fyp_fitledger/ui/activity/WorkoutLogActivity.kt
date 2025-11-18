@@ -22,8 +22,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.fyp_fitledger.R
+import com.example.fyp_fitledger.data.model.WorkoutExercise
+import com.example.fyp_fitledger.data.model.WorkoutLog
+import com.example.fyp_fitledger.data.model.WorkoutSet
+import com.example.fyp_fitledger.data.repo.FirebaseRepository
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
+import com.example.fyp_fitledger.data.local.dao.ExerciseDao
+import com.example.fyp_fitledger.data.local.dao.ExerciseDaoImpl
+import com.example.fyp_fitledger.data.local.dao.WorkoutDao
+import com.example.fyp_fitledger.data.local.dao.WorkoutDaoImpl
 import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -32,6 +40,8 @@ import java.util.Locale
 class WorkoutLogActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var exerciseDao: ExerciseDao
+    private lateinit var workoutDao: WorkoutDao
     private lateinit var userViewModel: UserViewModel
 
     private lateinit var userID: String
@@ -45,13 +55,25 @@ class WorkoutLogActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var timerRunnable: Runnable
 
+    private lateinit var firebaseRepo: FirebaseRepository
+
+    // save the primary key for the workout log & workout exercise & exercise set
+    private var workoutLogId: Long? = null
+    private var workoutExerciseIds = mutableListOf<Long>()
+    private var workoutExerciseSetIds = mutableListOf<Long>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_log)
 
         // Initialize DB and ViewModel
         dbHelper = DatabaseHelper(this)
+        exerciseDao = ExerciseDaoImpl(dbHelper)
+        workoutDao = WorkoutDaoImpl(dbHelper)
+
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+
+        firebaseRepo = FirebaseRepository()
 
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null)
@@ -65,8 +87,8 @@ class WorkoutLogActivity : AppCompatActivity() {
 
         // Get today's workout plan info
         val today = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-        val planId = dbHelper.getLatestPlanIdForUser(userID)
-        val planDayId = dbHelper.getPlanDayId(planId, today)
+        val planId = workoutDao.getLatestPlanIdForUser(userID)
+        val planDayId = workoutDao.getPlanDayId(planId, today)
 
         tvAddExercise = findViewById(R.id.tvAddExercise)
         tvAddExercise.setOnClickListener{
@@ -147,7 +169,7 @@ class WorkoutLogActivity : AppCompatActivity() {
             nameTextView.text = exerciseName
 
             // Get number of sets & default reps from WorkoutPlanExercise
-            val (sets, reps) = dbHelper.getSetsAndRepsForExercise(planDayId, exerciseName)
+            val (sets, reps) = workoutDao.getSetsAndRepsForExercise(planDayId, exerciseName)
             val numberOfSets = sets ?: 1
 
             repeat(numberOfSets) { setIndex ->
@@ -162,7 +184,7 @@ class WorkoutLogActivity : AppCompatActivity() {
                 setNumberText.text = "${setIndex + 1}"
                 if (reps != null) repsInput.hint = reps.toString()
 
-                val previous = dbHelper.getPreviousRecord(userID, exerciseName, setIndex + 1)
+                val previous = workoutDao.getPreviousRecord(userID, exerciseName, setIndex + 1)
                 previousRecord.text = previous ?: "-"
 
                 // Track all checkboxes for finish button logic
@@ -209,7 +231,7 @@ class WorkoutLogActivity : AppCompatActivity() {
 
                 setNumberText.text = setIndex.toString()
 
-                val previous = dbHelper.getPreviousRecord(userID, exerciseName, setIndex)
+                val previous = workoutDao.getPreviousRecord(userID, exerciseName, setIndex)
                 previousRecord.text = previous ?: "-"
 
                 // Enable checkbox only if inputs are valid
@@ -276,63 +298,7 @@ class WorkoutLogActivity : AppCompatActivity() {
             yesButton.setOnClickListener {
                 dialog.dismiss()
 
-                val durationMillis = System.currentTimeMillis() - startTimeMillis
-                val durationMinutes = (durationMillis / 60000).toInt()
-
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val currentDate = dateFormat.format(Date())
-                Log.d("--WorkoutSave--", "Inserting workout log: userID=$userID, date=$dateFormat, duration=$durationMinutes minutes")
-                val logId = dbHelper.insertWorkoutLog(userID, currentDate, durationMinutes)
-
-                for (i in 0 until container.childCount) {
-                    val exerciseView = container.getChildAt(i)
-                    val exerciseNameView = exerciseView.findViewById<TextView>(R.id.tvExerciseName)
-                    val setContainer = exerciseView.findViewById<LinearLayout>(R.id.setContainer)
-
-                    if (exerciseNameView == null || setContainer == null) {
-                        Log.e("--WorkoutSave", "Null view found at index $i")
-                        continue // Skip to avoid crash
-                    }
-
-                    val exerciseName = exerciseNameView.text.toString()
-                    val exerciseId = dbHelper.getExerciseIdByName(exerciseName)
-                    Log.d("--WorkoutSave", "Processing exercise: $exerciseName")
-                    Log.d("--WorkoutSave", "Retrieved exerciseId = $exerciseId")
-
-                    if (exerciseId == null) {
-                        Log.e("--WorkoutSave", "Exercise ID is null for $exerciseName")
-                        continue
-                    }
-
-                    val workoutExerciseId = dbHelper.insertWorkoutExercise(logId, exerciseId)
-                    Log.d("WorkoutSave", "Inserted WorkoutExercise: workoutExerciseId=$workoutExerciseId for exerciseId=$exerciseId")
-
-                    var anySetSaved = false
-
-                    for (j in 0 until setContainer.childCount) {
-                        val setView = setContainer.getChildAt(j)
-                        val cb = setView.findViewById<CheckBox>(R.id.cbCompleted)
-                        val repsInput = setView.findViewById<EditText>(R.id.etReps)
-                        val weightInput = setView.findViewById<EditText>(R.id.etWeight)
-
-                        if (cb?.isChecked == true) {
-                            val reps = repsInput?.text?.toString()?.toIntOrNull() ?: continue
-                            val weight = weightInput?.text?.toString()?.toFloatOrNull() ?: continue
-
-                            val setNumber = (j + 1).toString()
-                            Log.d("WorkoutSave", "Saving Set $setNumber for $exerciseName: reps=$reps, weight=$weight")
-                            dbHelper.insertExerciseSet(workoutExerciseId, (j + 1).toString(), reps, weight)
-                            anySetSaved = true
-                        }
-                    }
-
-                    if (!anySetSaved) {
-                        Log.d("--WorkoutSave", "No sets saved for $exerciseName. Deleted workoutExerciseId=$workoutExerciseId")
-                        dbHelper.deleteWorkoutExercise(workoutExerciseId)
-                    }
-                }
-
-
+                val workoutLog = saveWorkoutLog(container)
 
                 // Stop timer
                 handler.removeCallbacks(timerRunnable)
@@ -340,6 +306,8 @@ class WorkoutLogActivity : AppCompatActivity() {
                 prefs.edit().remove("start_time_millis").apply()
 
                 Toast.makeText(this, "Workout is saved", Toast.LENGTH_SHORT).show()
+
+                saveToFirebase(workoutLog)
 
                 // Navigate back to WorkoutActivity and re-highlight muscles
                 val intent = Intent(this, WorkoutActivity::class.java)
@@ -362,7 +330,7 @@ class WorkoutLogActivity : AppCompatActivity() {
             val nameTextView = exerciseView.findViewById<TextView>(R.id.tvExerciseName)
             nameTextView.text = exerciseName
 
-            val (sets, reps) = dbHelper.getSetsAndRepsForExercise(planDayId, exerciseName)
+            val (sets, reps) = workoutDao.getSetsAndRepsForExercise(planDayId, exerciseName)
             val numberOfSets = sets ?: 1
 
             repeat(numberOfSets) { setIndex ->
@@ -377,7 +345,7 @@ class WorkoutLogActivity : AppCompatActivity() {
                 setNumberText.text = "${setIndex + 1}"
                 if (reps != null) repsInput.hint = reps.toString()
 
-                val previous = dbHelper.getPreviousRecord(userID, exerciseName, setIndex + 1)
+                val previous = workoutDao.getPreviousRecord(userID, exerciseName, setIndex + 1)
                 previousRecord.text = previous ?: "-"
 
                 allCheckBoxes.add(checkBox)
@@ -410,6 +378,90 @@ class WorkoutLogActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveWorkoutLog(container: LinearLayout): WorkoutLog {
+        val durationMillis = System.currentTimeMillis() - startTimeMillis
+        val durationMinutes = (durationMillis / 60000).toInt()
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val currentDate = dateFormat.format(Date())
+
+        val logId = workoutDao.insertWorkoutLog(userID, currentDate, startTimeMillis, durationMinutes)
+        workoutLogId = logId
+
+        val exercisesList = mutableListOf<WorkoutExercise>()    //stored exercise log into workout model
+
+        for (i in 0 until container.childCount) {
+            val exerciseView = container.getChildAt(i)
+            val exerciseName = exerciseView.findViewById<TextView>(R.id.tvExerciseName).text.toString()
+            val exerciseId = exerciseDao.getExerciseIdByName(exerciseName) ?: continue
+
+            val setContainer = exerciseView.findViewById<LinearLayout>(R.id.setContainer)
+            val setsList = mutableListOf<WorkoutSet>()
+
+            Log.d("--WorkoutSave", "Processing exercise: $exerciseName")
+
+            val workoutExerciseId = workoutDao.insertWorkoutExercise(logId, exerciseId)
+            workoutExerciseIds.add(workoutExerciseId.toLong())
+            Log.d("WorkoutSave", "Inserted WorkoutExercise: workoutExerciseId=$workoutExerciseId for exerciseId=$exerciseId")
+
+            var anySetSaved = false
+
+            for (j in 0 until setContainer.childCount) {
+                val setView = setContainer.getChildAt(j)
+                val cb = setView.findViewById<CheckBox>(R.id.cbCompleted)
+                val repsInput = setView.findViewById<EditText>(R.id.etReps)
+                val weightInput = setView.findViewById<EditText>(R.id.etWeight)
+
+                if (cb?.isChecked == true) {
+                    val reps = repsInput?.text?.toString()?.toIntOrNull() ?: continue
+                    val weight = weightInput?.text?.toString()?.toDoubleOrNull() ?: continue
+
+                    val setNumber = (j + 1).toString()
+                    Log.d("WorkoutSave", "Saving Set $setNumber for $exerciseName: reps=$reps, weight=$weight")
+                    val workoutExerciseSetId = workoutDao.insertExerciseSet(workoutExerciseId, (j + 1).toString(), reps, weight)
+                    workoutExerciseSetIds.add(workoutExerciseSetId.toLong())
+
+                    setsList.add(WorkoutSet((j + 1).toString(), reps, weight))
+                    anySetSaved = true
+                }
+            }
+
+            if (!anySetSaved) {
+                Log.d("--WorkoutSave", "No sets saved for $exerciseName. Deleted workoutExerciseId=$workoutExerciseId")
+                workoutDao.deleteWorkoutExercise(workoutExerciseId)
+            }
+
+            if (setsList.isNotEmpty()) {
+                exercisesList.add(WorkoutExercise(exerciseId, setsList))
+            }
+        }
+
+        // parameter need to store to firebase
+        val workoutLog = WorkoutLog(
+            date = currentDate,
+            startTime = startTimeMillis,
+            duration = durationMinutes,
+            notes = "",     //TODO::add a write note UI
+            exercises = exercisesList
+        )
+
+        return workoutLog
+    }
+
+    private fun saveToFirebase(workoutList: WorkoutLog) {
+
+        firebaseRepo.saveWorkoutLog(workoutList) { success, error ->
+            if (success) {
+                workoutLogId?.let { workoutDao.markWorkoutLogSynced(it) }
+                workoutExerciseIds.forEach { workoutDao.markWorkoutExerciseSynced(it) }
+                workoutExerciseSetIds.forEach { workoutDao.markExerciseSetSynced(it) }
+
+                Log.d("WorkoutLogActivity", "Workout log saved to firebase!")
+            } else {
+                Log.e("WorkoutLogActivity", "Failed to save workout log to firebase: $error")
+            }
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -419,5 +471,4 @@ class WorkoutLogActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("WorkoutPrefs", MODE_PRIVATE)
         prefs.edit().remove("start_time_millis").apply()
     }
-
 }

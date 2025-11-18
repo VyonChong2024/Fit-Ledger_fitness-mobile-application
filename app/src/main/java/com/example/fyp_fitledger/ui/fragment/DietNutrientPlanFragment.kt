@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.fyp_fitledger.BuildConfig
 import com.example.fyp_fitledger.utils.helper.ChatGPTHelper
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.example.fyp_fitledger.ui.activity.DemographicActivity
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel

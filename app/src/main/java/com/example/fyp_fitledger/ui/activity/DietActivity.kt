@@ -2,7 +2,6 @@ package com.example.fyp_fitledger.ui.activity
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -14,7 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.ui.component.CircularPercentageRingView
 import com.example.fyp_fitledger.ui.component.NavBarControl
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
+import com.example.fyp_fitledger.data.local.dao.MealDao
+import com.example.fyp_fitledger.data.local.dao.MealDaoImpl
+import com.example.fyp_fitledger.data.model.Nutrients
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalDate
@@ -22,7 +24,7 @@ import java.time.LocalDate
 class DietActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
-    private lateinit var database: SQLiteDatabase
+    private lateinit var mealDao: MealDao
 
     private lateinit var userId: String
     private val currentDate: String = LocalDate.now().toString()
@@ -38,7 +40,7 @@ class DietActivity : AppCompatActivity() {
         NavBarControl.setupBottomNavigation(this, bottomNav)
 
         dbHelper = DatabaseHelper(this)
-        database = dbHelper.writableDatabase
+        mealDao = MealDaoImpl(dbHelper)
 
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null)
@@ -95,24 +97,50 @@ class DietActivity : AppCompatActivity() {
     }
 
     private fun updateNutrientRings() {
-        val intake = getTodayNutrientIntake()
-        val requirement = getUserNutrientRequirements()
+        val intake = getTodayNutrientIntake()        // Nutrients
+        val requirement = mealDao.getNutrientPlanByUserId(userId)  // Nutrients
 
-        intake.forEach { (nutrient, intakeValue) ->
-            val reqValue = requirement[nutrient] ?: return@forEach
+        if (requirement == null) {
+            Toast.makeText(this, "Nutrient Requirement not found", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        // Convert nutrients to a list for iteration
+        val nutrientList = listOf(
+            Triple("Calories", intake.calories, requirement.calories),
+            Triple("Protein", intake.protein, requirement.protein),
+            Triple("Carbohydrates", intake.carbohydrates, requirement.carbohydrates),
+            Triple("Fat", intake.fat, requirement.fat),
+            Triple("Iron", intake.iron, requirement.iron),
+            Triple("Calcium", intake.calcium, requirement.calcium),
+            Triple("Potassium", intake.potassium, requirement.potassium),
+            Triple("Magnesium", intake.magnesium, requirement.magnesium),
+            Triple("Zinc", intake.zinc, requirement.zinc),
+            Triple("Sodium", intake.sodium, requirement.sodium),
+            Triple("VitaminD", intake.vitaminD, requirement.vitaminD),
+            Triple("VitaminA", intake.vitaminA, requirement.vitaminA),
+            Triple("VitaminC", intake.vitaminC, requirement.vitaminC),
+            Triple("VitaminK", intake.vitaminK, requirement.vitaminK),
+            Triple("VitaminB12", intake.vitaminB12, requirement.vitaminB12)
+        )
+
+        nutrientList.forEach { (name, intakeValue, reqValue) ->
+            val ringView = ringViews[name] ?: return@forEach
+            val unit = getUnitForNutrient(name)
+
+            // Ring % value
             val percentage = if (reqValue == 0f) 0f else (intakeValue / reqValue) * 100f
-            val ringView = ringViews[nutrient] ?: return@forEach
-
             ringView.setPercentage(percentage)
 
-            val unit = getUnitForNutrient(nutrient)
-
-            when (nutrient) {
+            // Adjust text size by nutrient category
+            when (name) {
                 "Calories" -> ringView.setCenterTextSize(40f)
                 "Protein", "Carbohydrates", "Fat" -> ringView.setCenterTextSize(32f)
-                else -> ringView.setCenterTextSize(26f) // Minerals and Vitamins
+                else -> ringView.setCenterTextSize(26f)
             }
 
+            // Under or over requirement
             if (intakeValue <= reqValue) {
                 val remaining = reqValue - intakeValue
                 ringView.setCenterText(String.format("%.1f%s\nleft", remaining, unit))
@@ -125,76 +153,51 @@ class DietActivity : AppCompatActivity() {
         }
     }
 
-    private fun getTodayNutrientIntake(): Map<String, Float> {
-        val db = dbHelper.readableDatabase
-        val nutrients = mutableMapOf<String, Float>()
+    private fun getTodayNutrientIntake(): Nutrients {
 
-        val nutrientColumns = listOf(
-            "Calories", "Protein", "Carbohydrates", "Fat",
-            "Iron", "Calcium", "Potassium", "Magnesium", "Zinc", "Sodium",
-            "VitaminD", "VitaminA", "VitaminC", "VitaminK", "VitaminB12"
-        )
+        val foods = mealDao.getAllNutrientByDate(userId, currentDate)
 
-        // Set default value 0 for all nutrients
-        nutrientColumns.forEach { nutrients[it] = 0f }
+        var calories = 0f
+        var protein = 0f
+        var carbohydrates = 0f
+        var fat = 0f
+        var iron = 0f
+        var calcium = 0f
+        var potassium = 0f
+        var magnesium = 0f
+        var zinc = 0f
+        var sodium = 0f
+        var vitaminD = 0f
+        var vitaminA = 0f
+        var vitaminC = 0f
+        var vitaminK = 0f
+        var vitaminB12 = 0f
 
-        val query = """
-            SELECT f.*, mlf.Quantity
-            FROM MealLog ml
-            JOIN MealLogFood mlf ON ml.Log_ID = mlf.Log_ID
-            JOIN Food f ON f.Food_Name = mlf.Food
-            WHERE ml.User_ID = ? AND ml.Date = ?
-        """
+        for (f in foods) {
+            val qty = f.quantity
 
-        val cursor = db.rawQuery(query, arrayOf(userId, currentDate))
-
-        Log.d("--NutrientDebug", "Fetching intake for userId=$userId on date=$currentDate")
-
-        while (cursor.moveToNext()) {
-            val quantity = cursor.getFloat(cursor.getColumnIndexOrThrow("Quantity"))
-            Log.d("--NutrientDebug", "Food quantity: $quantity")
-            for (column in nutrientColumns) {
-                val value = cursor.getFloat(cursor.getColumnIndexOrThrow(column))
-                val newTotal = nutrients.getOrDefault(column, 0f) + (value * quantity)
-                nutrients[column] = newTotal
-                Log.d("--NutrientDebug", "$column: +${value * quantity} (total=$newTotal)")
-            }
+            calories += f.calories * qty
+            protein += f.protein * qty
+            carbohydrates += f.carbohydrates * qty
+            fat += f.fat * qty
+            iron += f.iron * qty
+            calcium += f.calcium * qty
+            potassium += f.potassium * qty
+            magnesium += f.magnesium * qty
+            zinc += f.zinc * qty
+            sodium += f.sodium * qty
+            vitaminD += f.vitaminD * qty
+            vitaminA += f.vitaminA * qty
+            vitaminC += f.vitaminC * qty
+            vitaminK += f.vitaminK * qty
+            vitaminB12 += f.vitaminB12 * qty
         }
 
-        cursor.close()
-        Log.d("--NutrientDebug", "Final intake values: $nutrients")
-        return nutrients
-    }
-
-
-    private fun getUserNutrientRequirements(): Map<String, Float> {
-        val db = dbHelper.readableDatabase
-        val nutrients = mutableMapOf<String, Float>()
-
-        val cursor = db.rawQuery(
-            "SELECT * FROM NutrientRequirement WHERE User_ID = ?",
-            arrayOf(userId)
+        return Nutrients(
+            calories, protein, carbohydrates, fat,
+            iron, calcium, potassium, magnesium, zinc, sodium,
+            vitaminD, vitaminA, vitaminC, vitaminK, vitaminB12
         )
-
-        Log.d("--NutrientDebug", "Fetching requirements for userId=$userId")
-
-        if (cursor.moveToFirst()) {
-            val nutrientColumns = listOf(
-                "Calories", "Protein", "Carbohydrates", "Fat",
-                "Iron", "Calcium", "Potassium", "Magnesium", "Zinc", "Sodium",
-                "VitaminD", "VitaminA", "VitaminC", "VitaminK", "VitaminB12"
-            )
-            for (column in nutrientColumns) {
-                val value = cursor.getFloat(cursor.getColumnIndexOrThrow(column))
-                nutrients[column] = value
-                Log.d("--NutrientDebug", "Requirement $column: $value")
-            }
-        } else {
-            Log.d("--NutrientDebug", "No requirement data found for userId=$userId")
-        }
-
-        cursor.close()
-        return nutrients
     }
 
     private fun getUnitForNutrient(nutrient: String): String {

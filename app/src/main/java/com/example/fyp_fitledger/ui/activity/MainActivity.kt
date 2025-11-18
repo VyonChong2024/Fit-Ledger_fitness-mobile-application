@@ -3,7 +3,6 @@ package com.example.fyp_fitledger.ui.activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -33,7 +32,11 @@ import androidx.core.graphics.drawable.toDrawable
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel
 import com.example.fyp_fitledger.utils.helper.AuthManager
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
+import com.example.fyp_fitledger.data.local.dao.FoodDao
+import com.example.fyp_fitledger.data.local.dao.FoodDaoImpl
+import com.example.fyp_fitledger.data.local.dao.UserDao
+import com.example.fyp_fitledger.data.local.dao.UserDaoImpl
 
 class MainActivity : ComponentActivity() {
 
@@ -41,7 +44,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var userViewModel: UserViewModel
 
     private lateinit var dbHelper: DatabaseHelper
-    private lateinit var database: SQLiteDatabase
+    private lateinit var foodDao: FoodDao
+    private lateinit var userDao: UserDao
 
     private var progressDialog: AlertDialog? = null // Loading Dialog
     private var doubleBackToExitPressedOnce = false
@@ -55,7 +59,8 @@ class MainActivity : ComponentActivity() {
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
         dbHelper = DatabaseHelper(this)
-        database = dbHelper.writableDatabase
+        foodDao = FoodDaoImpl(dbHelper)
+        userDao = UserDaoImpl(dbHelper)
 
         // Instantiate VideoView
         videoView = findViewById(R.id.VideoView)
@@ -80,8 +85,7 @@ class MainActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            dbHelper.importFoodDataFromJson(applicationContext, "foundationDownload.json")
-            Log.d("MainActivity", "Food data imported successfully")
+            foodDao.importFoodDataFromJson(applicationContext, "foundationDownload.json")
         }
 
         val signInButton = findViewById<Button>(R.id.signInButton)
@@ -136,7 +140,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleUserAfterSignIn(uid: String) {
-        val localUser = dbHelper.getUserByUid(uid)
+        val localUser = userDao.getUserById(uid)
         if (localUser != null) {
             // User exists locally, go to home
             startActivity(Intent(this, HomeActivity::class.java))
@@ -218,7 +222,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        database.close()
         dbHelper.close()
         super.onDestroy()
     }

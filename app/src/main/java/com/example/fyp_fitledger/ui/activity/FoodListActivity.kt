@@ -12,11 +12,14 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.example.fyp_fitledger.R
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
+import com.example.fyp_fitledger.data.local.dao.FoodDao
+import com.example.fyp_fitledger.data.local.dao.FoodDaoImpl
 
 class FoodListActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var foodDao: FoodDao
     private lateinit var foodContainer: LinearLayout
     private lateinit var searchEditText: EditText
     private var allFood: List<String> = listOf() // This will store all food names
@@ -27,10 +30,12 @@ class FoodListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_food_list)
 
         dbHelper = DatabaseHelper(this)
+        foodDao = FoodDaoImpl(dbHelper)
+
         foodContainer = findViewById(R.id.foodContainer)
         searchEditText = findViewById(R.id.searchEditText)
 
-        allFood = getAllFoodNames()
+        allFood = foodDao.getAllFoodName()
         filteredFood = allFood
         displayFoods(filteredFood)
 
@@ -55,19 +60,6 @@ class FoodListActivity : AppCompatActivity() {
                 false
             }
         }
-    }
-
-    private fun getAllFoodNames(): List<String> {
-        val foodList = mutableListOf<String>()
-        val db = dbHelper.readableDatabase
-        val cursor = db.rawQuery("SELECT Food_Name FROM Food", null)
-        cursor.use {
-            while (it.moveToNext()) {
-                val name = it.getString(it.getColumnIndexOrThrow("Food_Name"))
-                foodList.add(name)
-            }
-        }
-        return foodList
     }
 
     // Function to display the foods

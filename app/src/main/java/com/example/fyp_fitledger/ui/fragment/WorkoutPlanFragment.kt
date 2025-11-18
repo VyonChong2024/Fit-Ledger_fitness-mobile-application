@@ -2,7 +2,6 @@ package com.example.fyp_fitledger.ui.fragment
 
 import android.app.AlertDialog
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -21,7 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.fyp_fitledger.BuildConfig
 import com.example.fyp_fitledger.utils.helper.ChatGPTHelper
-import com.example.fyp_fitledger.utils.helper.DatabaseHelper
+import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.example.fyp_fitledger.ui.activity.DemographicActivity
 import com.example.fyp_fitledger.R
 import com.example.fyp_fitledger.data.viewmodel.UserViewModel
@@ -38,6 +37,8 @@ import org.json.JSONObject
 import java.io.IOException
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.content.edit
+import com.example.fyp_fitledger.data.local.dao.ExerciseDao
+import com.example.fyp_fitledger.data.local.dao.ExerciseDaoImpl
 import com.example.fyp_fitledger.data.model.Exercises
 import com.example.fyp_fitledger.data.model.WorkoutPlanDays
 
@@ -47,8 +48,7 @@ class WorkoutPlanFragment: Fragment() {
     private lateinit var workoutPlanViewModel: WorkoutPlanViewModel
 
     private lateinit var dbHelper: DatabaseHelper
-    private lateinit var database: SQLiteDatabase
-
+    private lateinit var exerciseDao: ExerciseDao
     private lateinit var workoutPlanContainer: LinearLayout
     private lateinit var btContinue: Button
     private val client = OkHttpClient()
@@ -66,7 +66,7 @@ class WorkoutPlanFragment: Fragment() {
         val view = inflater.inflate(R.layout.fragment_workout_plan, container, false) // Store the view
 
         dbHelper = DatabaseHelper(requireContext())
-        database = dbHelper.writableDatabase
+        exerciseDao = ExerciseDaoImpl(dbHelper)
 
         // Initialize ViewModel
         userViewModel = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
@@ -147,7 +147,7 @@ class WorkoutPlanFragment: Fragment() {
         val daySelected = workoutPlanViewModel.daySelected
         val duration = workoutPlanViewModel.duration
 
-        val workoutNames = retrieveAllWorkoutName()
+        val workoutNames = retrieveAllWorkoutName().joinToString(", ")
 
         val prompt = """
             These are all available workouts:
@@ -244,8 +244,8 @@ class WorkoutPlanFragment: Fragment() {
         })
     }
 
-    fun retrieveAllWorkoutName(): String {
-        val workoutNames = dbHelper.getColumnData("Exercise", "Name").joinToString(", ")
+    fun retrieveAllWorkoutName(): List<String> {
+        val workoutNames = exerciseDao.getAllExerciseNames()
         return workoutNames
     }
 
@@ -263,7 +263,7 @@ class WorkoutPlanFragment: Fragment() {
                     if (split.size == 3) {
                         val nameRaw = split[0].trim()
                         //Get the exact name from the Exercise table and find the best match
-                        val correctedName = matchExerciseName(nameRaw, dbHelper.getColumnData("Exercise", "Name").filterNotNull())
+                        val correctedName = matchExerciseName(nameRaw, retrieveAllWorkoutName())
                         val name = correctedName ?: nameRaw
 
                         val sets = split[1].trim().toIntOrNull()
