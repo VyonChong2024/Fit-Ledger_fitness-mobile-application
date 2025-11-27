@@ -142,7 +142,9 @@ class WorkoutActivity : AppCompatActivity() {
     private val trainedMusclesByDay: HashMap<String, Int> = hashMapOf()
 
     private lateinit var exerciseResultLauncher: ActivityResultLauncher<Intent>
-    private var hasOpenedWorkoutLog = false
+    companion object {
+        var hasOpenedWorkoutLog = false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -196,6 +198,8 @@ class WorkoutActivity : AppCompatActivity() {
                 }
             }
         }
+
+        updateStartWorkoutButton()
 
     }
 
@@ -420,12 +424,22 @@ class WorkoutActivity : AppCompatActivity() {
     }
 
     private fun updateStartWorkoutButton() {
-        if (hasOpenedWorkoutLog) {
+        val running = getSharedPreferences("WorkoutSession", MODE_PRIVATE)
+            .getBoolean("isRunning", false)
+
+        if (running) {
             cvStartWorkout.findViewById<CardView>(R.id.cvStartWorkout)?.apply {
                 setBackgroundColor(ContextCompat.getColor(context, R.color.grayish_lime_green))
             }
             cvStartWorkoutText.apply {
                 text = getString(R.string.frag_btn_cont)
+            }
+        } else {
+            cvStartWorkout.findViewById<CardView>(R.id.cvStartWorkout)?.apply {
+                setBackgroundColor(ContextCompat.getColor(context, R.color.japanese_laurel))
+            }
+            cvStartWorkoutText.apply {
+                text = "Start Workout"
             }
         }
     }
@@ -443,6 +457,10 @@ class WorkoutActivity : AppCompatActivity() {
         return distance < threshold
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateStartWorkoutButton()
+    }
     private var doubleBackToExitPressedOnce = false
 
     override fun onBackPressed() {

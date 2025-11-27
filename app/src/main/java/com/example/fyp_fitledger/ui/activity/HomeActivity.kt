@@ -88,7 +88,6 @@ class HomeActivity : AppCompatActivity() {
         ringViewCalorie = findViewById(R.id.pctRingCalories)
         pieChartDiet = findViewById(R.id.pieChartDiet)
 
-
         arrowLeft.setOnClickListener {
             selectedDay = selectedDay.minusDays(1)
             updateDateDisplay()
@@ -105,7 +104,7 @@ class HomeActivity : AppCompatActivity() {
             showCalendarPopup()
         }
 
-
+        updateDateDisplay()
         loadMealLogCalories(selectedDay.toString())
         loadMacronutrientDistribution(selectedDay.toString())
         loadWorkoutExercises(selectedDay.toString())

@@ -135,12 +135,8 @@ class WorkoutPlanFragment: Fragment() {
         val height = (userViewModel.height)?.format(2)
         val weight = (userViewModel.weight)?.format(2)
         val bodyFatPercent = (userViewModel.bodyFatPercent)?.format(1)
-        val bodyDensity = (userViewModel.bodyDensity)?.format(3)
-        val accFat = userViewModel.accFat
 
         val goal = workoutPlanViewModel.goal
-        val targetBodyFat = workoutPlanViewModel.targetBodyFat
-        val targetWeight = workoutPlanViewModel.targetWeight
         val activityLevel = workoutPlanViewModel.activityLevel
         val activityFrequency = workoutPlanViewModel.activityFrequency
         val targetMuscles = workoutPlanViewModel.targetMuscles
@@ -175,7 +171,7 @@ class WorkoutPlanFragment: Fragment() {
             4. The number of exercises should be based on the total workout duration, using a ratio of 1 exercise per 15 minutes. However, this may vary depending on the intensity level of the activity.
             5. Only include exercises that target the following muscle groups: $targetMuscles. Do not include exercises for other muscle groups not listed here.
             6. It's acceptable for the same muscle group to be trained more than once per week, as long as it follows rule #1.
-            7. The exercises name must exactly match the workout name. 
+            7. You MUST choose exercises ONLY from the provided list EXACTLY as written.
             
             Example:
             Monday|Push Day (chest & shoulder)|Barbell Bench Press:4:12|Incline Dumbbell Bench Press:4:12...
@@ -264,7 +260,7 @@ class WorkoutPlanFragment: Fragment() {
                         val nameRaw = split[0].trim()
                         //Get the exact name from the Exercise table and find the best match
                         val correctedName = matchExerciseName(nameRaw, retrieveAllWorkoutName())
-                        val name = correctedName ?: nameRaw
+                        val name = correctedName ?: return@mapNotNull null
 
                         val sets = split[1].trim().toIntOrNull()
                         val reps = split[2].trim().toIntOrNull()

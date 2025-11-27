@@ -11,6 +11,8 @@ import com.example.fyp_fitledger.data.model.WorkoutPlanDays
 import com.example.fyp_fitledger.data.model.WorkoutExercise
 import com.example.fyp_fitledger.data.model.WorkoutSet
 import com.example.fyp_fitledger.data.model.Exercises
+import com.example.fyp_fitledger.data.model.Nutrients
+import com.example.fyp_fitledger.data.model.WorkoutPlan
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
@@ -240,7 +242,7 @@ class FirebaseRepository {
     }
 
     fun getWorkoutPlan(
-        onResult: (Boolean, List<WorkoutPlanDays>?, String?) -> Unit
+        onResult: (Boolean, List<WorkoutPlan>?, String?) -> Unit
     ) {
         val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
 
@@ -253,13 +255,14 @@ class FirebaseRepository {
                     return@addOnSuccessListener
                 }
 
-                val allDays = mutableListOf<WorkoutPlanDays>()
+                val allDays = mutableListOf<WorkoutPlan>()
                 val dayTasks = mutableListOf<Task<QuerySnapshot>>()
 
                 // For each workout plan document
                 for (planDoc in plansSnapshot.documents) {
                     val daysRef = planDoc.reference.collection("days")
-
+                    val planName = planDoc.getString("planName") ?: "Default Plan"
+                    val createdDate = planDoc.getLong("createdDate") ?: 0L
                     val dayTask = daysRef.get().addOnSuccessListener { daysSnapshot ->
                         for (dayDoc in daysSnapshot.documents) {
 
@@ -274,10 +277,12 @@ class FirebaseRepository {
 
                             // Add to our result list
                             allDays.add(
-                                WorkoutPlanDays(
+                                WorkoutPlan(
                                     day = dayDoc.getString("dayName") ?: dayDoc.id,
                                     workoutName = dayDoc.getString("workoutName") ?: "",
-                                    exercises = exercisesList
+                                    exercises = exercisesList,
+                                    createdDate = createdDate.toString(),
+                                    planName = planName
                                 )
                             )
                         }
@@ -410,26 +415,46 @@ class FirebaseRepository {
             .addOnFailureListener { e -> onResult(false, null, e.message) }
     }
 
-    fun getNutrientRequirement(onResult: (Boolean, Map<String, Float>?, String?) -> Unit) {
+    fun getNutrientRequirement(onResult: (Boolean, Nutrients?, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResult(false, null, "User not signed in")
         val nutrientRef = db.collection("users").document(userId)
             .collection("nutrientRequirement").document("current")
 
         nutrientRef.get()
             .addOnSuccessListener { doc ->
-                if (doc.exists()) {
-                    val nutrients = doc.data?.mapValues { (_, value) ->
-                        when (value) {
-                            is Number -> value.toFloat()
-                            else -> 0f
-                        }
-                    } ?: emptyMap()
-                    onResult(true, nutrients, null)
-                } else {
+                if (!doc.exists()) {
                     onResult(false, null, "No nutrient data found")
+                    return@addOnSuccessListener
+                }
+
+                try {
+                    val nutrients = Nutrients(
+                        calories = doc.getDouble("Calories")?.toFloat() ?: 0f,
+                        protein = doc.getDouble("Protein")?.toFloat() ?: 0f,
+                        carbohydrates = doc.getDouble("Carbohydrates")?.toFloat() ?: 0f,
+                        fat = doc.getDouble("Fat")?.toFloat() ?: 0f,
+                        iron = doc.getDouble("Iron")?.toFloat() ?: 0f,
+                        calcium = doc.getDouble("Calcium")?.toFloat() ?: 0f,
+                        potassium = doc.getDouble("Potassium")?.toFloat() ?: 0f,
+                        magnesium = doc.getDouble("Magnesium")?.toFloat() ?: 0f,
+                        zinc = doc.getDouble("Zinc")?.toFloat() ?: 0f,
+                        sodium = doc.getDouble("Sodium")?.toFloat() ?: 0f,
+                        vitaminD = doc.getDouble("VitaminD")?.toFloat() ?: 0f,
+                        vitaminA = doc.getDouble("VitaminA")?.toFloat() ?: 0f,
+                        vitaminC = doc.getDouble("VitaminC")?.toFloat() ?: 0f,
+                        vitaminK = doc.getDouble("VitaminK")?.toFloat() ?: 0f,
+                        vitaminB12 = doc.getDouble("VitaminB12")?.toFloat() ?: 0f
+                    )
+
+                    onResult(true, nutrients, null)
+
+                } catch (e: Exception) {
+                    onResult(false, null, "Error parsing nutrient data")
                 }
             }
-            .addOnFailureListener { e -> onResult(false, null, e.message) }
+            .addOnFailureListener { e ->
+                onResult(false, null, e.message)
+            }
     }
 
     fun getBodyFatHistory(onResult: (Boolean, List<BodyFatEntry>?, String?) -> Unit) {

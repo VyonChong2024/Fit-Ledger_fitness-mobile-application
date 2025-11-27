@@ -26,3 +26,9 @@ data class WorkoutMuscleData(
     val date: String,
     val muscles: List<String>
 )
+
+data class SetEntry(
+    var reps: String? = null,
+    var weight: String? = null,
+    var checked: Boolean = false
+)
