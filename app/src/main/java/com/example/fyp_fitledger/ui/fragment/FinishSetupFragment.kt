@@ -143,9 +143,6 @@ class FinishSetupFragment : Fragment() {
                     else Log.e("MainActivity", "Save failed: $error")
                 }
 
-                //Final Data saved, set the user is complete setup
-                markSetupCompleteForUser(userId)
-
                 btnNext.isEnabled = true
                 Toast.makeText(requireContext(), "Saving data successful", Toast.LENGTH_SHORT).show()
                 Log.d("FinishSetupFragment", "Saving data successful")
@@ -213,11 +210,5 @@ class FinishSetupFragment : Fragment() {
             }
         }
         return valueList.toList() // Convert to immutable List if needed
-    }
-
-    fun markSetupCompleteForUser(uid: String) {
-        requireContext().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE).edit()
-            .putBoolean("setupComplete_$uid", true)
-            .apply()
     }
 }
