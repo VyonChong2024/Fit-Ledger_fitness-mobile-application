@@ -29,7 +29,7 @@
                 android:id="@+id/tvWorkoutName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Workout Name"
+                android:text="New Workout"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center_vertical|start"/>

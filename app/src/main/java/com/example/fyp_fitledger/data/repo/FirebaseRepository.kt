@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 
 class FirebaseRepository {
     private val auth = FirebaseAuth.getInstance()
@@ -413,6 +414,54 @@ class FirebaseRepository {
                     .addOnFailureListener { e -> onResult(false, null, e.message) }
             }
             .addOnFailureListener { e -> onResult(false, null, e.message) }
+    }
+
+    suspend fun getWorkoutLogsSuspend(): List<WorkoutLog> {
+        val userId = auth.currentUser?.uid ?: throw Exception("User not signed in")
+        val logsRef = db.collection("users").document(userId).collection("workoutLogs")
+
+        // 1. Fetch all Logs
+        val logsSnapshot = logsRef.get().await() // .await() waits for this to finish
+
+        val workoutLogs = mutableListOf<WorkoutLog>()
+
+        for (logDoc in logsSnapshot.documents) {
+            // 2. Fetch Exercises for this Log
+            val exRef = logDoc.reference.collection("exercises")
+            val exSnapshot = exRef.get().await() // Wait for exercises
+
+            val exercises = mutableListOf<WorkoutExercise>()
+
+            for (exDoc in exSnapshot.documents) {
+                val exerciseId = exDoc.getLong("exerciseId") ?: 0L
+
+                // 3. Fetch Sets for this Exercise
+                val setsRef = exDoc.reference.collection("sets")
+                val setsSnapshot = setsRef.get().await() // Wait for sets
+
+                val sets = setsSnapshot.map { setDoc ->
+                    WorkoutSet(
+                        setNo = setDoc.getString("setNo") ?: "",
+                        reps = (setDoc.getLong("reps") ?: 0L).toInt(),
+                        weightUsed = (setDoc.getDouble("weightUsed") ?: 0.0)
+                    )
+                }
+
+                exercises.add(WorkoutExercise(exerciseId = exerciseId, sets = sets))
+            }
+
+            // Build the log object
+            val log = WorkoutLog(
+                date = logDoc.getString("date") ?: "",
+                startTime = logDoc.getLong("startTime") ?: 0L,
+                duration = (logDoc.getLong("duration"))?.toInt() ?: 0,
+                notes = logDoc.getString("notes") ?: "",
+                exercises = exercises
+            )
+            workoutLogs.add(log)
+        }
+
+        return workoutLogs
     }
 
     fun getNutrientRequirement(onResult: (Boolean, Nutrients?, String?) -> Unit) {

@@ -44,6 +44,8 @@ import java.util.Locale
 import kotlin.math.max
 import androidx.core.content.edit
 import android.view.inputmethod.InputMethodManager
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class WorkoutLogActivity : AppCompatActivity() {
 
@@ -56,6 +58,7 @@ class WorkoutLogActivity : AppCompatActivity() {
     private lateinit var btnFinish: Button
     private lateinit var container: LinearLayout
     private lateinit var inflater: LayoutInflater
+    private lateinit var tvWorkoutName: TextView
     private lateinit var tvAddExercise: TextView
     private lateinit var tvCancelWorkout: TextView
     private lateinit var tvTimer: TextView
@@ -85,15 +88,16 @@ class WorkoutLogActivity : AppCompatActivity() {
                 val data = result.data
                 val names = data?.getStringArrayListExtra("SELECTED_EXERCISES")
                 names?.let {
-                    // snapshot existing UI so entries persist
-                    snapshotCurrentUIState()
+                    //snapshotCurrentUIState()
                     // add selected exercises (ViewModel avoids duplicates)
                     it.forEach { name -> viewModel.addExercise(name) }
                     viewModel.saveToPrefs(this)
-                    renderUI()
+                    //renderUI()
                 }
             }
         }
+
+    private val todayName = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +113,7 @@ class WorkoutLogActivity : AppCompatActivity() {
         inflater = LayoutInflater.from(this)
         container = findViewById(R.id.exerciseLogContainer)
         btnFinish = findViewById(R.id.btnFinish)
+        tvWorkoutName = findViewById(R.id.tvWorkoutName)
         tvAddExercise = findViewById(R.id.tvAddExercise)
         tvCancelWorkout = findViewById(R.id.tvCancelWorkout)
         tvTimer = findViewById(R.id.tvTimer)
@@ -196,7 +201,6 @@ class WorkoutLogActivity : AppCompatActivity() {
                 clearWorkoutRunning()
                 dialog.dismiss()
                 Toast.makeText(this, "Cancel workout", Toast.LENGTH_SHORT).show()
-                WorkoutActivity.hasOpenedWorkoutLog = false
                 finish()
             }
             dialog.show()
@@ -233,7 +237,6 @@ class WorkoutLogActivity : AppCompatActivity() {
                     val intent = Intent(this@WorkoutLogActivity, WorkoutActivity::class.java)
                     intent.putExtra("HIGHLIGHT_UPDATE", true)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    WorkoutActivity.hasOpenedWorkoutLog = false
                     startActivity(intent)
                     finish()
                 }
@@ -248,6 +251,7 @@ class WorkoutLogActivity : AppCompatActivity() {
      */
     private fun renderUI() {
         // prevent listeners from saving during bind
+        tvWorkoutName.text = workoutDao.getTodayWorkoutName(userID, todayName)?: "New Workout"
         isBinding = true
 
         container.removeAllViews()
@@ -335,6 +339,7 @@ class WorkoutLogActivity : AppCompatActivity() {
         val weightInput = setView.findViewById<EditText>(R.id.etWeight)
         val checkBox = setView.findViewById<CheckBox>(R.id.cbCompleted)
 
+        allCheckBoxes.add(checkBox)
         setNumberText.text = setNumber.toString()
 
         // === 1) GET PREVIOUS RECORD ============================================================
@@ -357,19 +362,14 @@ class WorkoutLogActivity : AppCompatActivity() {
         var dynamicWeightHint = finalWeightHint
 
         // === 3) APPLY ENTRY VALUES IF ANY ======================================================
-        isBinding = true
-        try {
-            if (entry != null) {
-                entry.reps?.let { repsInput.setText(it) }
-                entry.weight?.let { weightInput.setText(it) }
-                checkBox.isChecked = entry.checked
-            } else {
-                repsInput.setText("")
-                weightInput.setText("")
-                checkBox.isChecked = false
-            }
-        } finally {
-            isBinding = false
+        if (entry != null) {
+            entry.reps?.let { repsInput.setText(it) }
+            entry.weight?.let { weightInput.setText(it) }
+            checkBox.isChecked = entry.checked
+        } else {
+            repsInput.setText("")
+            weightInput.setText("")
+            checkBox.isChecked = false
         }
 
         // apply initial hints only if no typed value exists
@@ -689,7 +689,9 @@ class WorkoutLogActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // reload from prefs in case something changed while backgrounded
-        viewModel.loadFromPrefs(this)
+        if (viewModel.addedExercises.isEmpty()) {
+            viewModel.loadFromPrefs(this)
+        }
 
         // Safely reload start time only from WorkoutPrefs
         val timerPrefs = getSharedPreferences("WorkoutPrefs", MODE_PRIVATE)

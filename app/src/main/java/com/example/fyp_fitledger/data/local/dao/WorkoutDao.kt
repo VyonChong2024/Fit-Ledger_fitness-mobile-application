@@ -9,6 +9,7 @@ interface WorkoutDao {
     fun insertWorkoutPlanExercise(planDayId: Long, exerciseName: String, sets: Int, reps: Int): Long
     fun getLatestPlanIdForUser(userId: String): Int?
     fun getPlanDayId(planId: Int?, dayName: String): Int?
+    fun getTodayWorkoutName(userId: String, dayName: String): String?
     fun getTodayExercisePlanName(userId: String, dayName: String): List<String>
     fun getSetsAndRepsForExercise(planDayId: Int?, exerciseName: String): Pair<Int?, Int?>
 
@@ -21,7 +22,7 @@ interface WorkoutDao {
     fun insertExerciseSet(workoutExerciseId: Long, setNo: String, reps: Int, weight: Double): Long
     fun getPreviousRecord(userId: String, exerciseName: String, setNo: Int): String?
     fun getExerciseNamesByDate(userId: String, date: String): List<String>
-
+    fun getMuscleGroupForExercise(exerciseName: String): String?
     fun getMusclesTrainedByDate(userId: String, date: String): WorkoutMuscleData
 
     fun deleteWorkoutExercise(workoutExerciseId: Long)

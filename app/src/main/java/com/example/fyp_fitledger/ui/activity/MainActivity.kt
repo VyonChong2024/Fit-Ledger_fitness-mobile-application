@@ -14,10 +14,8 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Button
 import android.widget.Toast
-
 //Firebase import
 import com.google.firebase.auth.FirebaseAuth
-
 //Google Credential import
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
@@ -192,18 +190,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-            db.collection("users")
-                .get()
-                .addOnSuccessListener { snapshot ->
-                    Log.d("DEBUG_USERS", "Found ${snapshot.size()} users")
-                    for (doc in snapshot.documents) {
-                        Log.d("DEBUG_USERS", "Doc: ${doc.id} => ${doc.data}")
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("DEBUG_USERS", "Error fetching users", e)
-                }
-
             userRef.get()
                 .addOnSuccessListener { document ->
                     Log.d("=====MainActivity", "document: $document")
@@ -343,29 +329,34 @@ class MainActivity : ComponentActivity() {
         }
 
         // 4️⃣ IMPORT WORKOUT LOGS
-        suspendCoroutine { cont ->
-            fireRepo.getWorkoutLogs { success, workoutLogs, error ->
-                if (success && workoutLogs != null) {
-                    for (log in workoutLogs) {
-                        val logId = workoutDao.insertWorkoutLog(
-                            uid, log.date, log.startTime, log.duration, log.notes
-                        )
+        try {
+            // Call the new suspend function directly
+            val workoutLogs = fireRepo.getWorkoutLogsSuspend()
 
-                        log.exercises.forEach { ex ->
-                            val exId = workoutDao.insertWorkoutExercise(logId, ex.exerciseId)
-                            ex.sets.forEach { s ->
-                                workoutDao.insertExerciseSet(
-                                    exId,
-                                    s.setNo,
-                                    s.reps,
-                                    s.weightUsed
-                                )
-                            }
+            if (workoutLogs.isNotEmpty()) {
+                for (log in workoutLogs) {
+                    val logId = workoutDao.insertWorkoutLog(
+                        uid, log.date, log.startTime, log.duration, log.notes
+                    )
+
+                    log.exercises.forEach { ex ->
+                        val exId = workoutDao.insertWorkoutExercise(logId, ex.exerciseId)
+                        ex.sets.forEach { s ->
+                            workoutDao.insertExerciseSet(
+                                exId,
+                                s.setNo,
+                                s.reps,
+                                s.weightUsed
+                            )
                         }
                     }
-                    cont.resume(Unit)
-                } else cont.resumeWithException(Exception(error))
+                }
             }
+        } catch (e: Exception) {
+            // Log the error but continue importing other things if needed
+            Log.e("Import", "Failed to import workout logs", e)
+            // Optional: throw exception if you want to stop the whole import
+            // throw Exception("Failed to import workout logs: ${e.message}")
         }
 
         // 5️⃣ IMPORT NUTRIENT REQUIREMENT

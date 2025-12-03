@@ -59,6 +59,26 @@ class WorkoutDaoImpl(private val dbHelper: DatabaseHelper): WorkoutDao {
         cursor.use { return if (it.moveToFirst()) it.getInt(0) else null }
     }
 
+    override fun getTodayWorkoutName(userId: String, dayName: String): String? {
+        val db = dbHelper.readableDatabase
+
+        val cursor = db.rawQuery(
+            """
+            SELECT wpd.WorkoutName
+            FROM WorkoutPlan wp
+            JOIN WorkoutPlanDay wpd ON wp.Plan_ID = wpd.Plan_ID
+            WHERE wp.User_ID = ? AND wpd.DayName = ?
+            ORDER BY wp.CreatedDate DESC
+            LIMIT 1
+        """.trimIndent(),
+            arrayOf(userId, dayName)
+        )
+
+        cursor.use {
+            return if (it.moveToFirst()) it.getString(0) else null
+        }
+    }
+
     override fun getTodayExercisePlanName(userId: String, dayName: String): List<String> {
         val db = dbHelper.readableDatabase
         val list = mutableListOf<String>()
@@ -187,6 +207,17 @@ class WorkoutDaoImpl(private val dbHelper: DatabaseHelper): WorkoutDao {
         }
 
         return exerciseNames
+    }
+
+    override fun getMuscleGroupForExercise(exerciseName: String): String? {
+        val db = dbHelper.readableDatabase
+        val cursor = db.rawQuery("SELECT MuscleGroup FROM Exercise WHERE Name = ?", arrayOf(exerciseName))
+        var result: String? = null
+        if (cursor.moveToFirst()) {
+            result = cursor.getString(cursor.getColumnIndexOrThrow("MuscleGroup"))
+        }
+        cursor.close()
+        return result
     }
 
     override fun getMusclesTrainedByDate(userId: String, date: String): WorkoutMuscleData {

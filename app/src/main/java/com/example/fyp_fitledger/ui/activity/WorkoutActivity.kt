@@ -3,13 +3,13 @@ package com.example.fyp_fitledger.ui.activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -28,43 +28,38 @@ import com.example.fyp_fitledger.data.local.DatabaseHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.collections.iterator
-import kotlin.math.pow
-import kotlin.math.sqrt
 import androidx.core.graphics.toColorInt
-import androidx.core.graphics.createBitmap
+import androidx.lifecycle.lifecycleScope
 import com.example.fyp_fitledger.data.local.dao.WorkoutDao
 import com.example.fyp_fitledger.data.local.dao.WorkoutDaoImpl
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 class WorkoutActivity : AppCompatActivity() {
 
     private lateinit var ivSearch: ImageView
     private lateinit var cvStartWorkout: CardView
     private lateinit var cvStartWorkoutText: TextView
-
-    private lateinit var userId: String
-
     private lateinit var muscleImageView: ImageView
-    private lateinit var originalBitmap: Bitmap
-    private lateinit var maskBitmap: Bitmap
-    private lateinit var overlayBitmap: Bitmap
-    private lateinit var canvas: Canvas
-    private lateinit var paint: Paint
+    private lateinit var userId: String
     private lateinit var userViewModel: UserViewModel
 
     private lateinit var dbHelper: DatabaseHelper
     private lateinit var workoutDao: WorkoutDao
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var imageViewIndex = 0
     private val views = listOf("front", "side", "back")
+    // Track current index to allow immediate refresh on click
+    private var currentViewIndex = 0
 
+    // NEW: Track selection state
+    private var selectedView: View? = null
+    private var selectedMuscles: Set<String> = emptySet()
     private val addedExerciseNames = mutableListOf<String>()
     private val muscleColorMap = mapOf(
         "#00008d".toColorInt() to "Upper Chest",
@@ -141,10 +136,9 @@ class WorkoutActivity : AppCompatActivity() {
     )
     private val trainedMusclesByDay: HashMap<String, Int> = hashMapOf()
 
+    private val bitmapCache = mutableMapOf<String, Pair<Bitmap, Bitmap>>()
+    private val fastColorLookup = HashMap<Int, String>()
     private lateinit var exerciseResultLauncher: ActivityResultLauncher<Intent>
-    companion object {
-        var hasOpenedWorkoutLog = false
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,16 +172,8 @@ class WorkoutActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             startActivity(intent)
 
-            hasOpenedWorkoutLog = true
             updateStartWorkoutButton()  // update UI after opening
         }
-
-        cycleImage()
-        retrieveWorkoutData(userId)
-        Log.d("WorkoutActivity", "trainedMusclesByDay: $trainedMusclesByDay")
-        Log.d("WorkoutActivity", "retrieve workout data finish")
-        loadTodayWorkoutExercises(userId)
-        Log.d("WorkoutActivity", "load today workout data finish")
 
         exerciseResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -199,8 +185,14 @@ class WorkoutActivity : AppCompatActivity() {
             }
         }
 
-        updateStartWorkoutButton()
+        // 1. Initialize Fast Lookup Map
+        muscleColorMap.forEach { (color, name) -> fastColorLookup[color] = name }
+        retrieveWorkoutData(userId)
+        loadTodayWorkoutExercises(userId)
 
+        // 2. Start the image cycle using Lifecycle Scope
+        startMuscleImageCycle()
+        updateStartWorkoutButton()
     }
 
     private fun retrieveWorkoutData(userId: String) {
@@ -236,111 +228,165 @@ class WorkoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun highlightMuscles() {
-        if (originalBitmap.width != maskBitmap.width || originalBitmap.height != maskBitmap.height) {
-            Log.e("WorkoutActivity", "originalBitmap and maskBitmap size mismatch")
-            return
-        }
-        val combinedBitmap = createBitmap(originalBitmap.width, originalBitmap.height)
-        val alphaByDay = mapOf(
-            0 to 255,
-            1 to 150,
-            2 to 80
-        )
+    private fun startMuscleImageCycle() {
+        // lifecycleScope is bound to the Activity lifecycle.
+        // When Activity is destroyed, this loop STOPS automatically.
+        lifecycleScope.launch(Dispatchers.Default) {
+            var index = 0
+            while (isActive) { // Check if activity is still alive
+                val viewType = views[index % views.size]
 
-        // 1. Copy the original bitmap into the combinedBitmap first
-        val pixels = IntArray(originalBitmap.width * originalBitmap.height)
-        originalBitmap.getPixels(pixels, 0, originalBitmap.width, 0, 0, originalBitmap.width, originalBitmap.height)
+                // 3. Process the image (Background Thread)
+                val processedBitmap = processMuscleImage(viewType)
 
-        // 2. Read maskBitmap pixels
-        val maskPixels = IntArray(maskBitmap.width * maskBitmap.height)
-        maskBitmap.getPixels(maskPixels, 0, maskBitmap.width, 0, 0, maskBitmap.width, maskBitmap.height)
+                // 4. Update UI (Main Thread)
+                withContext(Dispatchers.Main) {
+                    if (processedBitmap != null) {
+                        muscleImageView.setImageBitmap(processedBitmap)
+                    }
+                }
 
-        // 3. Loop through the pixels (1D array, faster than 2D)
-        for (i in pixels.indices) {
-            val pixelColor = maskPixels[i]
-
-            val matchedEntry = muscleColorMap.entries.find { isColorSimilar(it.key, pixelColor) }
-            val muscleName = matchedEntry?.value
-
-            if (muscleName != null && trainedMusclesByDay.containsKey(muscleName)) {
-                val daysAgo = trainedMusclesByDay[muscleName] ?: continue
-                val alpha = alphaByDay[daysAgo] ?: 0
-
-                // 4. Blend red color on top of the original pixel
-                val originalColor = pixels[i]
-
-                val red = Color.red(originalColor)
-                val green = Color.green(originalColor)
-                val blue = Color.blue(originalColor)
-
-                // Blend slightly toward red
-                val newRed = (red + 255) / 2
-                val newGreen = (green) / 2
-                val newBlue = (blue) / 2
-
-                // Create the new color with alpha
-                val blendedColor = Color.argb(alpha, newRed, newGreen, newBlue)
-
-                pixels[i] = blendedColor
+                // 5. Wait 2 seconds
+                delay(2000)
+                index++
             }
         }
-
-        // 5. Set all pixels back
-        combinedBitmap.setPixels(pixels, 0, combinedBitmap.width, 0, 0, combinedBitmap.width, combinedBitmap.height)
-
-        // 6. Finally draw combined bitmap
-        canvas.drawBitmap(combinedBitmap, 0f, 0f, null)
     }
 
-    private fun cycleImage() {
+    private fun processMuscleImage(viewType: String): Bitmap? {
         val gender = userViewModel.gender ?: "male"
-        val viewType = views[imageViewIndex % views.size]
-        val imageName = "muscle_${gender}_${viewType}"
-        val maskName = "muscle_${gender}_${viewType}_color"
+        val cacheKey = "${gender}_$viewType"
 
-        val imageResId = resources.getIdentifier(imageName, "drawable", packageName)
-        val maskResId = resources.getIdentifier(maskName, "drawable", packageName)
+        // A. Load Bitmaps (Use Cache if available to save CPU/Memory)
+        var bitmaps = bitmapCache[cacheKey]
+        if (bitmaps == null) {
+            val imageName = "muscle_${gender}_${viewType}"
+            val maskName = "muscle_${gender}_${viewType}_color"
 
-        if (imageResId == 0 || maskResId == 0) {
-            Log.e("WorkoutActivity", "Image resource not found for $imageName or $maskName")
-            return
+            val imageResId = resources.getIdentifier(imageName, "drawable", packageName)
+            val maskResId = resources.getIdentifier(maskName, "drawable", packageName)
+
+            if (imageResId == 0 || maskResId == 0) return null
+
+            val original = BitmapFactory.decodeResource(resources, imageResId)
+            val mask = BitmapFactory.decodeResource(resources, maskResId)
+
+            // Check for size mismatch
+            if (original.width != mask.width || original.height != mask.height) {
+                // Resize mask to match original if needed, or return null
+                return null
+            }
+
+            bitmaps = Pair(original, mask)
+            bitmapCache[cacheKey] = bitmaps
         }
 
-        val tempOriginalBitmap = BitmapFactory.decodeResource(resources, imageResId)
-        val tempMaskBitmap = BitmapFactory.decodeResource(resources, maskResId)
+        val originalBitmap = bitmaps.first
+        val maskBitmap = bitmaps.second
 
-        if (tempOriginalBitmap == null || tempMaskBitmap == null) {
-            Log.e("WorkoutActivity", "Bitmap decoding failed for $imageName or $maskName")
-            return
-        }
+        // B. Create Mutable Copy
+        val width = originalBitmap.width
+        val height = originalBitmap.height
+        val resultBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
 
-        originalBitmap = tempOriginalBitmap
-        maskBitmap = tempMaskBitmap
+        val pixels = IntArray(width * height)
+        val maskPixels = IntArray(width * height)
 
-        overlayBitmap = Bitmap.createBitmap(originalBitmap.width, originalBitmap.height, Bitmap.Config.ARGB_8888)
-        canvas = Canvas(overlayBitmap)
+        resultBitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        maskBitmap.getPixels(maskPixels, 0, width, 0, 0, width, height)
 
-        // Now start background work
-        GlobalScope.launch(Dispatchers.Default) {
-            highlightMuscles()
+        var matchingPixelCount = 0
+        var isTargetSelected = false
+        // C. Fast Pixel Processing
+        for (i in pixels.indices) {
+            val maskColor = maskPixels[i]
 
-            // After highlight done, switch to UI thread
-            withContext(Dispatchers.Main) {
-                val imageViewHeight = muscleImageView.height
-                val aspectRatio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
-                val scaledHeight = imageViewHeight
-                val scaledWidth = (scaledHeight * aspectRatio).toInt()
+            // Skip transparent mask pixels immediately
+            if (maskColor == 0 || Color.alpha(maskColor) == 0) continue
 
-                val scaledBitmap = Bitmap.createScaledBitmap(overlayBitmap, scaledWidth, scaledHeight, false)
-                muscleImageView.setImageBitmap(scaledBitmap)
+            // 1. O(1) Lookup instead of looping through the map
+            // Note: If your mask PNG has compression artifacts (colors aren't exact),
+            // you might need the 'closestMatch' logic. If it's a clean PNG, this works.
+            var muscleName = fastColorLookup[maskColor]
 
-                // After everything done, THEN start next cycle
-                imageViewIndex++
-                Log.d("WorkoutActivity", "Paint finish, start timer 2 seconds")
-                handler.postDelayed({ cycleImage() }, 2000)
+            // Fallback: If exact match fails, try fuzzy match (only if necessary)
+            if (muscleName == null) {
+                muscleName = findClosestMuscleColor(maskColor)
+            }
+
+            if (muscleName != null) {
+                isTargetSelected = true
+                val daysAgo = trainedMusclesByDay[muscleName]
+                if (daysAgo != null) {
+                    // Apply Tint
+                    val alpha = when (daysAgo) {
+                        0 -> 120 // Today (Darker/Stronger)
+                        1 -> 60 // Yesterday
+                        2 -> 30  // 2 Days ago
+                        else -> 0
+                    }
+
+                    if (alpha > 0) {
+                        pixels[i] = blendColors(pixels[i], Color.RED, alpha)
+                    }
+                }
+            }
+            if (selectedMuscles.contains(muscleName)) {
+                // Apply GREEN tint (High Priority)
+                pixels[i] = blendColors(pixels[i], Color.GREEN, 120)
+
+                // Only increment count if it matches the TARGET
+                matchingPixelCount++
+                isTargetSelected = true
             }
         }
+        Log.d("PAINT_DEBUG", "View: $viewType | Target Muscles: $selectedMuscles | Found Pixels: $matchingPixelCount | Target Selected: $isTargetSelected")
+        resultBitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+        return resultBitmap
+    }
+
+    // Fast blend function using bitwise math (No Color objects)
+    private fun blendColors(baseColor: Int, overlayColor: Int, alpha: Int): Int {
+        val r1 = (baseColor shr 16) and 0xFF
+        val g1 = (baseColor shr 8) and 0xFF
+        val b1 = baseColor and 0xFF
+
+        val r2 = (overlayColor shr 16) and 0xFF
+        val g2 = (overlayColor shr 8) and 0xFF
+        val b2 = overlayColor and 0xFF
+
+        // Simple alpha blending
+        val r = (r1 * (255 - alpha) + r2 * alpha) / 255
+        val g = (g1 * (255 - alpha) + g2 * alpha) / 255
+        val b = (b1 * (255 - alpha) + b2 * alpha) / 255
+
+        return (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+    }
+
+    // Optimized Fuzzy Match (No Sqrt, No Pow)
+    private fun findClosestMuscleColor(targetColor: Int): String? {
+        var minDistance = Int.MAX_VALUE
+        var closestMuscle: String? = null
+        val thresholdSquared = 35 * 35 // Squared threshold
+
+        val r1 = (targetColor shr 16) and 0xFF
+        val g1 = (targetColor shr 8) and 0xFF
+        val b1 = targetColor and 0xFF
+
+        for ((color, name) in fastColorLookup) {
+            val r2 = (color shr 16) and 0xFF
+            val g2 = (color shr 8) and 0xFF
+            val b2 = color and 0xFF
+
+            // Use Squared Distance (Much faster than Sqrt)
+            val dist = (r1 - r2) * (r1 - r2) + (g1 - g2) * (g1 - g2) + (b1 - b2) * (b1 - b2)
+
+            if (dist < minDistance && dist < thresholdSquared) {
+                minDistance = dist
+                closestMuscle = name
+            }
+        }
+        return closestMuscle
     }
 
     private fun loadTodayWorkoutExercises(userId: String) {
@@ -357,23 +403,9 @@ class WorkoutActivity : AppCompatActivity() {
         for (exerciseName in exerciseList) {
             addedExerciseNames.add(exerciseName)
 
-            val tv = TextView(this).apply {
-                text = exerciseName
-                textSize = 12f
-                setTextColor(ContextCompat.getColor(context, R.color.white))
-                setPadding(20, 12, 40, 12)
-                background = ContextCompat.getDrawable(context, R.drawable.round_corner_background)
-                maxWidth = 520
-
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { setMargins(0, 0, 0, 40) }
-            }
-
+            val tv = createExerciseView(exerciseName)
             container.addView(tv)
         }
-
         updateContainerBias()
     }
 
@@ -444,17 +476,122 @@ class WorkoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun isColorSimilar(color1: Int, color2: Int, threshold: Int = 35): Boolean {
-        val r1 = Color.red(color1)
-        val g1 = Color.green(color1)
-        val b1 = Color.blue(color1)
+    // --- NEW LOGIC: Helper to create the Exercise TextView ---
+    private fun createExerciseView(exerciseName: String): TextView {
+        return TextView(this).apply {
+            text = exerciseName
+            textSize = 12f
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            setPadding(20, 12, 40, 12)
 
-        val r2 = Color.red(color2)
-        val g2 = Color.green(color2)
-        val b2 = Color.blue(color2)
+            // Default State
+            background = ContextCompat.getDrawable(context, R.drawable.round_corner_background)
+            typeface = Typeface.DEFAULT
 
-        val distance = sqrt(((r1 - r2).toDouble().pow(2.0)) + ((g1 - g2).toDouble().pow(2.0)) + ((b1 - b2).toDouble().pow(2.0)))
-        return distance < threshold
+            maxWidth = 520
+            tag = exerciseName
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(0, 0, 0, 40) }
+
+            setOnClickListener { view ->
+                onExerciseClicked(view, exerciseName)
+            }
+        }
+    }
+
+    // --- NEW LOGIC: Handle Click Event ---
+    private fun onExerciseClicked(view: View, exerciseName: String) {
+        val textView = view as TextView
+
+        // 1. Reset previous selection UI
+        selectedView?.let { prev ->
+            val prevTv = prev as TextView
+            // Restore normal font
+            prevTv.typeface = Typeface.DEFAULT
+            // Restore original background drawable
+            prevTv.background = ContextCompat.getDrawable(this, R.drawable.round_corner_background)
+            // Restore white text if you changed it
+            prevTv.setTextColor(ContextCompat.getColor(this, R.color.white))
+        }
+
+        // 2. If clicking the same item, deselect it
+        if (selectedView == view) {
+            selectedView = null
+            selectedMuscles = emptySet()
+        } else {
+            // 3. Select new item UI
+            selectedView = view
+
+            // SET BOLD
+            textView.typeface = Typeface.DEFAULT_BOLD
+
+            // SET SELECTED BACKGROUND (Programmatically tinting green)
+            val drawable = ContextCompat.getDrawable(this, R.drawable.round_corner_background)?.mutate()
+            // Using a distinct color for selection (e.g., Green or a Lighter Gray)
+            drawable?.setTint("#4CAF50".toColorInt())
+            textView.background = drawable
+
+            // 4. Update Muscle Selection Data
+            updateSelectedMusclesFromDB(exerciseName)
+        }
+
+        // 5. Force refresh
+        forceRefreshImage()
+    }
+
+    private fun updateSelectedMusclesFromDB(exerciseName: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val newSelection = mutableSetOf<String>()
+
+            // Get string from DB
+            val muscleString = workoutDao.getMuscleGroupForExercise(exerciseName)
+
+            Log.d("MUSCLE_DEBUG", "Exercise: $exerciseName, DB Returned: $muscleString")
+
+            if (muscleString != null) {
+                // Split by comma, TRIM spaces, and force LOWERCASE for mapping matching
+                val muscleParts = muscleString.split(",").map { it.trim().lowercase() }
+
+                for (part in muscleParts) {
+                    Log.d("MUSCLE_DEBUG", "Processing part: '$part'")
+
+                    // robust mapping lookup
+                    val specificMuscles = broadMuscleMappings[part]
+                        ?: broadMuscleMappings[part.replace(" ", "")] // Handle "front delts" vs "frontdelts"
+                        ?: broadMuscleMappings[part.removeSuffix("s")] // Handle "shoulders" vs "shoulder"
+                        // Fallback: If map fails, Capitalize it (e.g. "bicep" -> "Bicep")
+                        ?: listOf(part.split(" ").joinToString(" ") {
+                            it.replaceFirstChar { char -> char.uppercase() }
+                        })
+
+                    Log.d("MUSCLE_DEBUG", "Mapped '$part' to: $specificMuscles")
+                    newSelection.addAll(specificMuscles)
+                }
+            } else {
+                Log.e("MUSCLE_DEBUG", "No muscle group found in DB for $exerciseName")
+            }
+
+            selectedMuscles = newSelection
+
+            withContext(Dispatchers.Main) {
+                forceRefreshImage()
+            }
+        }
+    }
+
+    private fun forceRefreshImage() {
+        lifecycleScope.launch(Dispatchers.Default) {
+            val viewType = views[currentViewIndex % views.size]
+            val processedBitmap = processMuscleImage(viewType)
+            withContext(Dispatchers.Main) {
+                if (processedBitmap != null) {
+                    muscleImageView.setImageBitmap(processedBitmap)
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -474,6 +611,6 @@ class WorkoutActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             doubleBackToExitPressedOnce = false
-        }, 2000) // 2 seconds delay
+        }, 5000)
     }
 }
