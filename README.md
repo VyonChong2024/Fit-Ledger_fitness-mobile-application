@@ -40,14 +40,6 @@ This application follows the **MVVM (Model-View-ViewModel)** architecture patter
 3.  **Logging:** The user inputs their workout details and food intakes.
 5.  **Storage:** All logs and user profiles are synchronized in real-time with the Firebase Firestore database.
 
-## 📸 Screenshots
-
-| Login Screen | Dashboard | Workout Log | Profile |
-|:---:|:---:|:---:|:---:|
-| <img src="screenshots/login.png" width="200"/> | <img src="screenshots/dashboard.png" width="200"/> | <img src="screenshots/log.png" width="200"/> | <img src="screenshots/profile.png" width="200"/> |
-
-*(Note: Create a folder named `screenshots` in your repository and upload your images there).*
-
 ## 🛠️ Tech Stack
 
 * **Language:** [Kotlin](https://kotlinlang.org/)
@@ -140,4 +132,5 @@ Contributions are welcome!
 ## 📄 License
 
 This project is open source.
+
 
